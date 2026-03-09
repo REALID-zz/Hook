@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set title = "发布 sell - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">发布 sell</div>
+    <div class="panel-body">
+      <form method="post" action="/sell/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <label>
+          <div class="label">标题</div>
+          <input name="title" placeholder="例如：iPad Air 64G / 旧相机 / 书架" required />
+        </label>
+        <label>
+          <div class="label">价格</div>
+          <div class="row" style="flex-wrap:wrap;">
+            <select class="select" name="currency" style="min-width:120px;">
+              <option value="CNY">CNY</option>
+              <option value="HKD">HKD</option>
+              <option value="USD">USD</option>
+            </select>
+            <input name="price" type="number" min="0" step="1" placeholder="数字" style="max-width:180px;" />
+          </div>
+        </label>
+        <label>
+          <div class="label">描述</div>
+          <textarea name="description" rows="5" placeholder="成色、使用情况、是否包邮、交易方式（建议面交/平台内约定）。"></textarea>
+        </label>
+        <label>
+          <div class="label">联系方式（可选）</div>
+          <input name="contact" placeholder="例如：邮箱 / 微信号（自行承担公开风险）" />
+        </label>
+        <label class="row" style="gap:10px;">
+          <input type="checkbox" name="contactPublic" />
+          <div class="muted small">公开展示联系方式</div>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">发布</button>
+          <a class="btn" href="/sell?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

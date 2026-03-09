@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-label="Ahelpis Yihai product model map">
+  <defs>
+    <style>
+      :root{color-scheme:light;}
+      .bg{fill:#ffffff;}
+      .card{fill:#fbfbfc;stroke:#151515;stroke-width:2;rx:22;ry:22;}
+      .soft{fill:#ffffff;stroke:#151515;stroke-width:2;rx:18;ry:18;}
+      .gold{fill:#c7a04a;}
+      .t0{font:700 30px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;fill:#111;}
+      .t1{font:700 22px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;fill:#111;}
+      .t3{font:500 16px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;fill:#4a4a4a;}
+      .mono{font:600 15px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New";fill:#111;}
+      .arrow{stroke:#151515;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+      .arrowSoft{stroke:#151515;stroke-width:2;fill:none;stroke-dasharray:6 6;stroke-linecap:round;}
+      .pill{fill:#111;}
+      .pillText{font:700 14px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New";fill:#fff;letter-spacing:.06em;}
+    </style>
+    <marker id="mArrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
+      <path d="M1,1 L13,7 L1,13" fill="none" stroke="#151515" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="820"/>
+
+  <text class="t0" x="60" y="78">Ahelpis Yihai (MVP) - Product Model Map</text>
+  <text class="t3" x="60" y="112">Core action: share one ID card. Split realtime needs vs public trustworthy info.</text>
+
+  <!-- ID card (hub) -->
+  <rect class="card" x="520" y="160" width="360" height="210"/>
+  <circle class="gold" cx="560" cy="208" r="10"/>
+  <text class="t1" x="586" y="214">ID card</text>
+  <text class="t3" x="586" y="242">entry / profile / share</text>
+  <text class="mono" x="560" y="284">/</text>
+  <text class="mono" x="560" y="312">/profile (My world)</text>
+  <text class="mono" x="560" y="340">/card/&lt;public_id&gt;</text>
+
+  <!-- Helpis -->
+  <rect class="soft" x="140" y="130" width="310" height="240"/>
+  <circle class="gold" cx="178" cy="180" r="8"/>
+  <text class="t1" x="200" y="186">Helpis</text>
+  <text class="t3" x="200" y="212">realtime party (venue-level)</text>
+  <text class="mono" x="178" y="252">/help#helpis</text>
+  <text class="t3" x="178" y="282">locate once -> nearest venue</text>
+  <text class="t3" x="178" y="308">one-tap templates -> /interact/new</text>
+  <text class="t3" x="178" y="334">presence refresh (visible only)</text>
+
+  <!-- Universe -->
+  <rect class="soft" x="980" y="130" width="310" height="240"/>
+  <circle class="gold" cx="1018" cy="180" r="8"/>
+  <text class="t1" x="1040" y="186">Universe</text>
+  <text class="t3" x="1040" y="212">world view</text>
+  <text class="mono" x="1018" y="252">/universe</text>
+  <text class="t3" x="1018" y="282">time gradient + radar + ripples</text>
+  <text class="t3" x="1018" y="308">people nodes + sun core</text>
+
+  <!-- public loby -->
+  <rect class="soft" x="140" y="440" width="310" height="240"/>
+  <circle class="gold" cx="178" cy="490" r="8"/>
+  <text class="t1" x="200" y="496">public loby</text>
+  <text class="t3" x="200" y="522">entry aggregator</text>
+  <text class="mono" x="178" y="562">/coffeechat</text>
+  <text class="t3" x="178" y="592">coffee / messages / services</text>
+  <text class="t3" x="178" y="618">keep non-core entries here</text>
+
+  <!-- public well done -->
+  <rect class="soft" x="520" y="470" width="360" height="210"/>
+  <circle class="gold" cx="560" cy="518" r="8"/>
+  <text class="t1" x="582" y="524">public well done</text>
+  <text class="t3" x="582" y="550">long-term public value</text>
+  <text class="mono" x="560" y="590">/public</text>
+  <text class="t3" x="560" y="620">safety / lost / news</text>
+
+  <!-- news -->
+  <rect class="soft" x="980" y="440" width="310" height="240"/>
+  <circle class="gold" cx="1018" cy="490" r="8"/>
+  <text class="t1" x="1040" y="496">news</text>
+  <text class="t3" x="1040" y="522">message rights</text>
+  <text class="mono" x="1018" y="562">/charity</text>
+  <text class="t3" x="1018" y="592">title + quote + source link</text>
+  <text class="t3" x="1018" y="618">manual refresh (optional daily)</text>
+
+  <!-- arrows from hub -->
+  <path class="arrow" d="M520,265 C465,265 450,265 450,265" marker-end="url(#mArrow)"/>
+  <path class="arrow" d="M880,265 C930,265 955,265 980,265" marker-end="url(#mArrow)"/>
+  <path class="arrow" d="M700,370 C700,410 700,430 700,470" marker-end="url(#mArrow)"/>
+
+  <!-- arrows between lower modules -->
+  <path class="arrowSoft" d="M450,560 C495,560 510,560 520,560" marker-end="url(#mArrow)"/>
+  <path class="arrowSoft" d="M880,560 C930,560 955,560 980,560" marker-end="url(#mArrow)"/>
+
+  <!-- bottom pills -->
+  <rect class="pill" x="60" y="730" width="290" height="42" rx="999" ry="999"/>
+  <text class="pillText" x="82" y="758">Core: share an ID card</text>
+  <rect class="pill" x="370" y="730" width="320" height="42" rx="999" ry="999"/>
+  <text class="pillText" x="392" y="758">Realtime: Helpis (venue-level)</text>
+  <rect class="pill" x="710" y="730" width="340" height="42" rx="999" ry="999"/>
+  <text class="pillText" x="732" y="758">Trust: public well done + news</text>
+  <rect class="pill" x="1070" y="730" width="270" height="42" rx="999" ry="999"/>
+  <text class="pillText" x="1092" y="758">Aggregate: public loby</text>
+</svg>

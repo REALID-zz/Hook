@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% set _t = title or "Ahelpis一海" %}
+    {% set _t = _t|replace(" - 阿邦", " - Ahelpis一海") %}
+    {% set _t = _t|replace(" - Ahelp阿邦", " - Ahelpis一海") %}
+    {% set _t = _t|replace(" - Ahelp阿海", " - Ahelpis一海") %}
+    {% set _t = _t|replace(" - Ahelpis阿海", " - Ahelpis一海") %}
+    {% set _t = _t|replace(" - AHELP阿海", " - Ahelpis一海") %}
+    {% set _t = _t|replace(" - AHELPIS阿海", " - Ahelpis一海") %}
+    {% set _t = _t|replace("AHELPIS阿海", "Ahelpis一海") %}
+    {% set _t = _t|replace("Ahelpis阿海", "Ahelpis一海") %}
+    {% set _t = _t|replace("阿海", "一海") %}
+    <title>{{ _t }}</title>
+    <meta name="theme-color" content="#050812" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/static/manifest.webmanifest" />
+    <link rel="icon" href="/static/icon.svg" />
+    <link rel="apple-touch-icon" href="/static/icon.svg" />
+    <link rel="stylesheet" href="/static/app.css?v=20260304-cream1" />
+  </head>
+  <body class="{{ bodyClass|default('') }}{% if request.query_params.get('m') == '1' %} forceMobile{% endif %}">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="iconbtn backbtn" id="globalBackBtn" type="button" aria-label="返回上一页" style="display:none;">←</button>
+        <a class="brand" href="/?mode={{ mode|default('global') }}">
+          <span class="brand-en">Ahelpis</span>
+          <span class="brand-cn">一海</span>
+        </a>
+        <a class="glowBtn glowBtnHead" href="/plan" aria-label="Plan 计划">
+          <span class="glowBtnTop">PLAN</span>
+          <span class="glowBtnSub">计划本</span>
+        </a>
+      </div>
+      <div class="topbar-center"></div>
+      <div class="topbar-right">
+        <form class="mode-form" action="{{ request.url.path }}" method="get">
+          {% if venue %}<input type="hidden" name="venue" value="{{ venue.id }}" />{% endif %}
+          <select class="select" name="mode" onchange="this.form.submit()">
+            <option value="global" {% if mode == 'global' %}selected{% endif %}>Area: Global</option>
+            <option value="cn" {% if mode == 'cn' %}selected{% endif %}>Area: CN</option>
+            <option value="hk" {% if mode == 'hk' %}selected{% endif %}>Area: HK</option>
+          </select>
+        </form>
+        <form class="venue-mini" action="{{ request.url.path }}" method="get">
+          <input type="hidden" name="mode" value="{{ mode|default('global') }}" />
+          <select class="select" name="venue" onchange="this.form.submit()">
+            {% for v in venues %}
+              <option value="{{ v.id }}" {% if venue and v.id == venue.id %}selected{% endif %}>
+                {{ v.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+        <a class="link" href="/auth">登录</a>
+      </div>
+    </header>
+
+    {% set p = request.url.path %}
+    {% set qs = "mode=" ~ (mode|default('global')) %}
+    {% if venue %}{% set qs = qs ~ "&venue=" ~ venue.id %}{% endif %}
+    {% if request.query_params.get('m') == '1' %}{% set qs = qs ~ "&m=1" %}{% endif %}
+
+    <nav class="bottomnav" aria-label="bottom navigation">
+      <a class="btab {% if p.startswith('/universe') or p.startswith('/map') %}active{% endif %}" href="/universe?{{ qs }}">
+        <span class="bicon asteroid" aria-hidden="true"></span>
+        <span class="blabel duoText"><span class="en">Universe</span><span class="cn">world</span></span>
+      </a>
+      <a class="btab {% if p.startswith('/public') or p.startswith('/safety') or p.startswith('/lost') or p.startswith('/emergency') %}active{% endif %}" href="/public?{{ qs }}">
+        <span class="bicon">▦</span>
+        <span class="blabel duoText"><span class="en">public well done</span><span class="cn">公共价值</span></span>
+      </a>
+      <a class="btab {% if p.startswith('/coffee') or p.startswith('/coffeechat') %}active{% endif %}" href="/coffeechat?{{ qs }}">
+        <span class="bicon">☕</span>
+        <span class="blabel duoText"><span class="en">public loby</span><span class="cn">大厅</span></span>
+      </a>
+      <a class="btab {% if p.startswith('/help') or p.startswith('/post') %}active{% endif %}" href="/help?{{ qs }}#helpis">
+        <span class="bicon">🔑</span>
+        <span class="blabel duoText"><span class="en">Helpis</span><span class="cn">实时party</span></span>
+      </a>
+    </nav>
+
+    <nav class="tabs">
+      <a class="tab duo {% if p.startswith('/universe') or p.startswith('/map') %}active{% endif %}" href="/universe?{{ qs }}">
+        <span class="tabIcon icon-universe" aria-hidden="true"></span>
+        <span>Universe</span>
+        <span class="tabSub">world</span>
+      </a>
+      <a class="tab duo {% if p.startswith('/public') or p.startswith('/safety') or p.startswith('/lost') or p.startswith('/emergency') %}active{% endif %}" href="/public?{{ qs }}">
+        <span class="tabIcon icon-public" aria-hidden="true"></span>
+        <span>public well done</span>
+        <span class="tabSub">公共价值</span>
+      </a>
+      <a class="tab duo {% if p.startswith('/coffee') or p.startswith('/coffeechat') %}active{% endif %}" href="/coffeechat?{{ qs }}">
+        <span class="tabIcon icon-loby" aria-hidden="true"></span>
+        <span>public loby</span>
+        <span class="tabSub">大厅</span>
+      </a>
+      <a class="tab duo {% if p.startswith('/help') or p.startswith('/post') %}active{% endif %}" href="/help?{{ qs }}#helpis">
+        <span class="tabIcon icon-helpis" aria-hidden="true"></span>
+        <span>Helpis</span>
+        <span class="tabSub">实时party</span>
+      </a>
+    </nav>
+
+    <main class="shell">
+      <section class="content">
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+
+    <footer class="footer">© Ahelpis一海</footer>
+
+    <div class="installbar" id="installBar" style="display:none;">
+      <div class="installbar-inner">
+        <div class="installbar-title">添加到主屏幕</div>
+        <button class="btn primary" id="installBtn" type="button">安装</button>
+        <button class="btn" id="installClose" type="button">稍后</button>
+      </div>
+    </div>
+
+    <script>
+      // Service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/static/sw.js').catch(()=>{});
+        });
+      }
+      // Install prompt (Chrome/Edge Android)
+      let deferredPrompt = null;
+      const bar = document.getElementById('installBar');
+      const btn = document.getElementById('installBtn');
+      const close = document.getElementById('installClose');
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (bar) bar.style.display = 'block';
+      });
+      if (btn) btn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        try {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+        } finally {
+          deferredPrompt = null;
+          if (bar) bar.style.display = 'none';
+        }
+      });
+      if (close) close.addEventListener('click', () => {
+        if (bar) bar.style.display = 'none';
+      });
+    </script>
+
+    <script>
+      (() => {
+        const btn = document.getElementById('globalBackBtn');
+        if (!btn) return;
+
+        const p = String(location.pathname || '/');
+        const isHub =
+          (p === '/') ||
+          p.startsWith('/help') ||
+          p.startsWith('/profile') ||
+          p.startsWith('/auth') ||
+          p.startsWith('/coffee') ||
+          p.startsWith('/public');
+
+        btn.style.display = isHub ? 'none' : 'inline-flex';
+
+        btn.addEventListener('click', () => {
+          try {
+            if (history.length > 1) {
+              history.back();
+              return;
+            }
+          } catch {}
+          try { location.href = '/'; } catch {}
+        });
+      })();
+    </script>
+
+    <script>
+      (() => {
+        function onMove(e){
+          const el = e.currentTarget;
+          const r = el.getBoundingClientRect();
+          const x = Math.max(0, Math.min(r.width, (e.clientX - r.left)));
+          const y = Math.max(0, Math.min(r.height, (e.clientY - r.top)));
+          el.style.setProperty('--rx', `${x}px`);
+          el.style.setProperty('--ry', `${y}px`);
+          el.style.setProperty('--rvis', '1');
+        }
+        function onLeave(e){
+          const el = e.currentTarget;
+          el.style.setProperty('--rvis', '0');
+        }
+        function onDown(e){
+          const el = e.currentTarget;
+          try{ el.style.setProperty('--rvis', '1'); }catch{}
+          const r = el.getBoundingClientRect();
+          const x = Math.max(0, Math.min(r.width, (e.clientX - r.left)));
+          const y = Math.max(0, Math.min(r.height, (e.clientY - r.top)));
+          try{
+            el.style.setProperty('--rx', `${x}px`);
+            el.style.setProperty('--ry', `${y}px`);
+          }catch{}
+          const s = document.createElement('span');
+          s.className = 'rippleClick';
+          s.style.left = `${x}px`;
+          s.style.top = `${y}px`;
+          el.appendChild(s);
+          s.addEventListener('animationend', () => s.remove(), { once: true });
+        }
+        function onUp(e){
+          const el = e.currentTarget;
+          // Touch devices may not fire pointerleave; fade out after interaction
+          setTimeout(() => {
+            try{ el.style.setProperty('--rvis', '0'); }catch{}
+          }, 180);
+        }
+        function init(){
+          document.querySelectorAll('[data-ripple]').forEach(el => {
+            if (el.__rippleBound) return;
+            el.__rippleBound = true;
+            el.addEventListener('pointermove', onMove, { passive: true });
+            el.addEventListener('pointerleave', onLeave, { passive: true });
+            el.addEventListener('pointerdown', onDown, { passive: true });
+            el.addEventListener('pointerup', onUp, { passive: true });
+            el.addEventListener('pointercancel', onUp, { passive: true });
+          });
+        }
+        init();
+        window.addEventListener('load', init);
+      })();
+    </script>
+  </body>
+</html>
+

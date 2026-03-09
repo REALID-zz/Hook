@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set title = "风险通报 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">已核实风险通报（去标识化）</div>
+    <div class="panel-body">
+      <div class="hint">
+        仅展示平台已核实的内容：案件编号、风险类型、场所与时间窗口、平台处置结果。\n
+        不展示联系方式、精确定位等个人信息；若提交人申请“公开署名”且其选择了“姓名公示”，通报会显示署名，否则显示匿名。
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">通报列表（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      {% if bulletins %}
+        <ul class="postlist">
+          {% for b in bulletins %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">{{ b.category }}</span>
+                <span class="muted">#{{ b.id }} | {{ b.createdAt }}</span>
+                {% if b.authorLabel %}<span class="badge">署名：{{ b.authorLabel }}</span>{% endif %}
+              </div>
+              <div class="posttitle">{{ b.summary }}</div>
+              <div class="postbody muted small">{{ b.publicNote }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">暂时没有已核实通报（原型默认空）。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

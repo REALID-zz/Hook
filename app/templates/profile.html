@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% set title = "ID card - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">ID card（个人）</div>
+    <div class="panel-body">
+      <div class="passportCard" style="width:min(920px, 100%);">
+        <div class="passportGlow" aria-hidden="true"></div>
+        <div class="passportTop" style="padding:16px 16px 0;">
+          <div class="passportBrand">
+            <span class="passportEn">Ahelpis</span>
+            <span class="passportCn">一海</span>
+          </div>
+          <div class="passportTags">
+            <span class="shareWrap">
+              <button class="iconbtn" id="shareBtn" type="button" aria-label="分享/隔空投送">⤴</button>
+              <span class="shareTip" role="tooltip">SEND</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="passportMain" style="padding:12px 16px 14px;">
+          <div class="passportName">{{ displayName or "Name" }}</div>
+          <div class="passportTitle">{{ titleLine or "Title" }}</div>
+          <div class="passportIdLine" style="margin-top:12px;">
+            <span class="passportIdK">ID</span>
+            <span class="passportIdV mono">{{ personId }}</span>
+          </div>
+          <div class="row" style="margin-top:12px;">
+            <a class="btn primary" href="{{ cardUrl }}">OPEN</a>
+            <button class="btn" id="copyBtn" type="button">SEND</button>
+          </div>
+        </div>
+      </div>
+
+      <details class="panel" style="margin-top:14px;">
+        <summary class="panel-title">设置</summary>
+        <div class="panel-body">
+          <form class="form" method="post" action="/identity">
+            <input type="hidden" name="mode" value="{{ mode|default('global') }}" />
+            <input type="hidden" name="venue" value="{{ venue.id if venue else '' }}" />
+            <input type="hidden" name="next" value="/profile" />
+            <label>
+              <div class="label">Name</div>
+              <input name="displayName" placeholder="你的名字（建议真实）" value="{{ displayName|default('') }}" autocomplete="name" />
+            </label>
+            <label>
+              <div class="label">Title</div>
+              <input name="titleLine" placeholder="例如：Architect / Designer" value="{{ titleLine|default('') }}" />
+            </label>
+            <label>
+              <div class="label">姓名公示</div>
+              <select class="select" name="namePublic">
+                <option value="0" {% if (namePublic|default(0)|int) == 0 %}selected{% endif %}>不公示</option>
+                <option value="1" {% if (namePublic|default(0)|int) == 1 %}selected{% endif %}>公示</option>
+              </select>
+            </label>
+            <div class="row">
+              <button class="btn primary" type="submit">保存</button>
+            </div>
+          </form>
+
+          <form class="form" method="post" action="/profile/privacy" style="margin-top:12px;">
+            <label>
+              <div class="label">ID card 可见性</div>
+              <select class="select" name="privacy">
+                <option value="public" {% if visibility == "public" %}selected{% endif %}>公开</option>
+                <option value="venue_verified" {% if visibility == "venue_verified" %}selected{% endif %}>同场所验证可见</option>
+                <option value="private" {% if visibility == "private" %}selected{% endif %}>不公开</option>
+              </select>
+            </label>
+            <div class="row">
+              <button class="btn primary" type="submit">保存</button>
+            </div>
+          </form>
+
+          <form class="form" method="post" action="/profile/presence" style="margin-top:12px;">
+            <label>
+              <div class="label">在线状态（附近在线）</div>
+              <select class="select" name="presence">
+                <option value="online" {% if presenceMode != "offline" %}selected{% endif %}>在线（可被统计）</option>
+                <option value="offline" {% if presenceMode == "offline" %}selected{% endif %}>离线（不出现、不计数）</option>
+              </select>
+            </label>
+            <div class="hint">离线后你仍可浏览/发帖，但不会出现在“附近在线”。</div>
+            <div class="row">
+              <button class="btn primary" type="submit">保存</button>
+            </div>
+          </form>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const shareBtn = document.getElementById('shareBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      const tip = shareBtn && shareBtn.parentElement ? shareBtn.parentElement.querySelector('.shareTip') : null;
+      const getLink = () => {
+        try { return String(new URL({{ cardUrl|tojson }}, location.origin)); } catch {}
+        try { return String(location.origin + {{ cardUrl|tojson }}); } catch {}
+        return '';
+      };
+      async function copy(text) {
+        if (!text) return false;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch {}
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          return !!ok;
+        } catch {}
+        return false;
+      }
+      async function share() {
+        const url = getLink();
+        const title = 'ID card';
+        const original = tip ? tip.textContent : '';
+        try {
+          if (navigator.share) {
+            await navigator.share({ title, url });
+            if (tip) tip.textContent = 'SENT';
+            setTimeout(() => { if (tip) tip.textContent = original; }, 1200);
+            return;
+          }
+        } catch {}
+        const ok = await copy(url);
+        if (tip) tip.textContent = ok ? 'SENT' : 'FAILED';
+        setTimeout(() => { if (tip) tip.textContent = original; }, 1200);
+      }
+      if (shareBtn) shareBtn.addEventListener('click', share);
+      if (copyBtn) copyBtn.addEventListener('click', async () => {
+        const ok = await copy(getLink());
+        if (copyBtn) copyBtn.textContent = ok ? 'SENT' : 'FAILED';
+        setTimeout(() => { if (copyBtn) copyBtn.textContent = 'SEND'; }, 1200);
+      });
+    })();
+  </script>
+{% endblock %}
+

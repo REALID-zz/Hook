@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set title = "发布需求 / ForYou - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">发布需求 / ForYou（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <form method="post" action="/companion/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <label>
+          <div class="label">类型</div>
+          <select name="kind" class="select">
+            <option value="study">学习/自习陪伴</option>
+            <option value="sport">运动/散步陪伴</option>
+            <option value="medical">就医/办事陪同</option>
+            <option value="city">城市散步/看展同行</option>
+            <option value="other">其他（需合规）</option>
+          </select>
+        </label>
+        <label>
+          <div class="label">开始时间（可选）</div>
+          <input name="startAt" type="datetime-local" />
+          <div class="hint">不填则默认“现在开始”；需求默认展示 1 天有效。</div>
+        </label>
+        <label>
+          <div class="label">需求说明（不含地址/联系方式）</div>
+          <textarea name="body" rows="7" placeholder="例如：下午2点在商场一层咖啡区碰面；需要陪同看展2小时；希望对方健谈但不过度打探隐私。"></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">发布</button>
+          <a class="btn" href="/companion?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+        <div class="hint">禁止成人服务、禁止未成年人线下邀约。请在公共区域会面，拒绝转账/验证码。</div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

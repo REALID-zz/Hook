@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% set title = "民众反馈 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">民众反馈</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/safety/report?venue={{ venue.id if venue else '' }}">举报纠纷 / 民众反馈</a>
+      </div>
+      <div class="hint">
+        我们不做“点名曝光/人肉”。通报仅展示平台能核实的、去标识化的信息：案件编号、类型、场所与时间窗口、处理结果。
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">你的最近提交</div>
+    <div class="panel-body">
+      {% if reports %}
+        <ul class="postlist">
+          {% for r in reports %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">{{ r.category }}</span>
+                <span class="muted">#{{ r.id }} | {{ r.status }} | {{ r.createdAt }}</span>
+                {% if r.isPublic %}
+                  <span class="badge">已通报</span>
+                {% elif r.publishRequest %}
+                  <span class="badge">申请公开·{{ "署名" if r.authorDisplay == "signed" else "匿名" }}</span>
+                {% else %}
+                  <span class="badge">仅平台处理</span>
+                {% endif %}
+              </div>
+              <div class="posttitle">{{ r.summary }}</div>
+              <div class="postbody muted small">{{ r.publicNote or "（未公示）" }}</div>
+              {% if r.evidenceUrl %}
+                <div class="hint"><a href="{{ r.evidenceUrl }}" target="_blank" rel="noopener noreferrer">附件证据</a></div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">还没有提交记录。</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel" id="opinions">
+    <div class="panel-title">互动板（专业建议 / 民众意见 + 道德评分）</div>
+    <div class="panel-body">
+      <div class="hint">
+        两种互动：专业建议需上传律师/专业资质凭证；普通意见无需。道德评分是“民意调查”式投票，按百分比分布展示。
+        <span class="muted">为避免无成本灌水，发布/投票前需先完成平台实名留档。</span>
+        {% if venue and venue.id %}
+          <a class="link" href="/realname?venue={{ venue.id }}&next={{ (('/safety?venue=' ~ venue.id ~ '%23opinions')|urlencode) }}">去实名留档</a>
+        {% else %}
+          <a class="link" href="/realname">去实名留档</a>
+        {% endif %}
+      </div>
+
+      <div class="splitBoard" style="margin-top:12px;">
+        <div class="splitLeft">
+          <details class="panel" open>
+            <summary class="panel-title">专业建议（需上传律师/专业资质）</summary>
+            <div class="panel-body">
+              <form method="post" action="/safety/opinion" class="form" enctype="multipart/form-data">
+                <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+                <input type="hidden" name="kind" value="pro" />
+                <label>
+                  <div class="label">标题</div>
+                  <input name="title" maxlength="160" placeholder="例如：消费纠纷怎么保全证据/怎么谈判" required />
+                </label>
+                <label>
+                  <div class="label">建议（简要）</div>
+                  <textarea name="body" rows="5" placeholder="只写通用建议，不要写个人隐私信息。"></textarea>
+                </label>
+                <label>
+                  <div class="label">上传凭证（必填）</div>
+                  <input type="file" name="credential" accept=".pdf,image/*" required />
+                  <div class="hint">凭证仅用于平台核验，不会在页面公开展示。</div>
+                </label>
+                <div class="row">
+                  <button class="btn primary" type="submit">发布专业建议</button>
+                </div>
+              </form>
+            </div>
+          </details>
+
+          <details class="panel" open>
+            <summary class="panel-title">民众意见（普通看法）</summary>
+            <div class="panel-body">
+              <form method="post" action="/safety/opinion" class="form">
+                <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+                <input type="hidden" name="kind" value="public" />
+                <label>
+                  <div class="label">标题</div>
+                  <input name="title" maxlength="160" placeholder="例如：这里的规则/服务我觉得…" required />
+                </label>
+                <label>
+                  <div class="label">看法（可选）</div>
+                  <textarea name="body" rows="4" placeholder="尽量描述事实与建议，不要写隐私信息。"></textarea>
+                </label>
+                <div class="row">
+                  <button class="btn primary" type="submit">发布意见</button>
+                </div>
+              </form>
+            </div>
+          </details>
+        </div>
+
+        <div class="splitRight">
+          <div class="feedHead row between" style="align-items:flex-end;">
+            <div style="font-weight:900;">旁边在说什么</div>
+            <div class="muted small">可滚动查看 · 最新在上</div>
+          </div>
+          <div class="feedScroll">
+            {% if opinions %}
+              <ul class="postlist" style="border-top:none;">
+                {% for o in opinions %}
+                  <li class="postitem" style="padding:12px 0;">
+                    <div class="postmeta">
+                      {% if o.kind == 'pro' %}
+                        <span class="badge">专业建议</span>
+                        <span class="badge">{{ '核验中' if o.credStatus == 'pending' else ('已核验' if o.credStatus == 'verified' else '未核验') }}</span>
+                      {% else %}
+                        <span class="badge">民众意见</span>
+                      {% endif %}
+                      <span class="muted small">{{ o.author }} · {{ o.createdAt }}</span>
+                    </div>
+                    <div class="posttitle">{{ o.title }}</div>
+                    {% if o.body %}
+                      <div class="postbody muted small">{{ o.body }}</div>
+                    {% endif %}
+
+                    <div class="moralBox">
+                      <div class="row between" style="align-items:center;">
+                        <div class="muted small">道德评分（民意调查）</div>
+                        <div class="muted small">总票数：{{ o.votes.total }}</div>
+                      </div>
+                      <div class="moralBars" aria-label="moral distribution">
+                        <div class="moralStack" aria-hidden="true">
+                          <div class="moralSeg low" style="width: {{ o.votes.pctLow }}%"></div>
+                          <div class="moralSeg mid" style="width: {{ o.votes.pctMid }}%"></div>
+                          <div class="moralSeg high" style="width: {{ o.votes.pctHigh }}%"></div>
+                        </div>
+                        <div class="moralLegend muted small">
+                          <span>偏低 {{ o.votes.pctLow }}%</span>
+                          <span>中间 {{ o.votes.pctMid }}%</span>
+                          <span>偏高 {{ o.votes.pctHigh }}%</span>
+                        </div>
+                      </div>
+                      <form method="post" action="/safety/vote" class="row" style="margin-top:8px;">
+                        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+                        <input type="hidden" name="opinionId" value="{{ o.id }}" />
+                        <button class="btn" type="submit" name="score" value="20">偏低</button>
+                        <button class="btn" type="submit" name="score" value="55">中间</button>
+                        <button class="btn" type="submit" name="score" value="85">偏高</button>
+                        {% if o.myScore is not none %}
+                          <span class="muted small">你的选择：{{ o.myScore }}</span>
+                        {% endif %}
+                      </form>
+
+                      <div class="row" style="margin-top:8px;">
+                        <a class="btn" href="/messages?room=venue:{{ venue.id if venue else '' }}">进入同场所聊天</a>
+                        <button class="btn" type="button" data-convert-report data-title="{{ o.title|e }}" data-body="{{ o.body|default('')|e }}" data-kind="{{ o.kind|e }}">转为举报/工单</button>
+                        <button class="btn" type="button" data-copy-checklist data-title="{{ o.title|e }}" data-body="{{ o.body|default('')|e }}">复制处理清单</button>
+                      </div>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="muted">还没有互动内容。你可以在左侧先发布一条。</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const venueId = {{ (venue.id if venue else '')|tojson }};
+      function makeReportUrl(kind, title, body){
+        const cat = (kind === 'pro') ? 'dispute' : 'feedback';
+        const u = new URL(location.origin + '/safety/report');
+        if (venueId) u.searchParams.set('venue', venueId);
+        u.searchParams.set('category', cat);
+        if (title) u.searchParams.set('summary', String(title).slice(0, 240));
+        if (body) u.searchParams.set('details', String(body).slice(0, 1800));
+        return u.toString();
+      }
+      function makeChecklist(title, body){
+        const t = String(title || '').trim();
+        const b = String(body || '').trim();
+        return [
+          `【处理清单】${t || '（无标题）'}`,
+          '',
+          '1) 先确认事实与时间窗口（避免隐私信息）',
+          '2) 收集可核验证据（聊天记录/票据/现场照片等）',
+          '3) 写清诉求：你希望对方/平台做什么',
+          '4) 约定边界：不转账/不验证码/不私下见面（如有风险）',
+          '',
+          b ? ('【原文】\\n' + b) : '',
+        ].filter(Boolean).join('\\n');
+      }
+
+      document.querySelectorAll('[data-convert-report]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const kind = btn.dataset.kind || 'public';
+          const title = btn.dataset.title || '';
+          const body = btn.dataset.body || '';
+          location.href = makeReportUrl(kind, title, body);
+        });
+      });
+      document.querySelectorAll('[data-copy-checklist]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const text = makeChecklist(btn.dataset.title || '', btn.dataset.body || '');
+          try{
+            await navigator.clipboard.writeText(text);
+            alert('已复制到剪贴板');
+          }catch{
+            prompt('复制下面文本：', text);
+          }
+        });
+      });
+    })();
+  </script>
+{% endblock %}
+

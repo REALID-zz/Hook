@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% set title = "创作者大厅 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">创作者大厅（故事 + 作品卡 + 打赏）</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn" href="/messages?room=global">进入实时大厅</a>
+        <a class="btn" href="/profile">打开我的卡包</a>
+      </div>
+      <div class="hint">你支持一次，就会在卡包里获得一张“感谢卡”（收集玩法）。平台认可后可解锁更多奖励机制（后续细化）。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">正在发生（实时）</div>
+    <div class="panel-body">
+      <div id="liveFeed" class="feedbox"></div>
+      <div class="hint">这里是“活着的市场”雏形：实时显示支持事件（原型）。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">创作者列表</div>
+    <div class="panel-body">
+      {% if creators %}
+        <ul class="postlist">
+          {% for c in creators %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">creator</span>
+                {% if c.recognition == "verified" %}
+                  <span class="badge">认可_已认证</span>
+                {% elif c.recognition == "candidate" %}
+                  <span class="badge">认可_候选</span>
+                {% else %}
+                  <span class="muted">认可_未申请</span>
+                {% endif %}
+              </div>
+              <div class="posttitle">{{ c.name }}</div>
+              <div class="postbody">{{ c.story }}</div>
+
+              <div class="panel" style="margin-top:10px;">
+                <div class="panel-title">作品卡（示例）</div>
+                <div class="panel-body">
+                  <div class="grid">
+                    {% for w in c.works %}
+                      <div class="tile">
+                        <div class="tile-thumb"></div>
+                        <div class="tile-title">{{ w.title }}</div>
+                        <div class="tile-meta muted">{{ w.desc }}</div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <a class="btn" href="/messages?room=creator:{{ c.id }}">实时讨论</a>
+                <button class="btn primary" type="button" onclick="openTip('{{ c.id }}','{{ c.name }}')">打赏支持</button>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">暂无创作者。</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div id="tipOverlay" class="overlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-title">
+        打赏支持 <span id="tipCreatorName"></span>
+        <button class="iconbtn" type="button" onclick="closeTip()">×</button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="/tips" class="form">
+          <input type="hidden" name="creatorId" id="tipCreatorId" />
+          <label>
+            <div class="label">金额（{{ 'CNY' if mode=='cn' else 'HKD' }}）</div>
+            <input name="amount" type="number" min="10" step="10" value="{{ 50 if mode!='cn' else 20 }}" />
+          </label>
+          <label>
+            <div class="label">支付方式（占位）</div>
+            {% if mode == 'cn' %}
+              <select name="paymentMethod" class="select">
+                <option value="wxpay">微信支付</option>
+                <option value="alipay">支付宝</option>
+              </select>
+            {% else %}
+              <select name="paymentMethod" class="select">
+                <option value="card">银行卡/信用卡</option>
+                <option value="fps">转数快/本地转账</option>
+              </select>
+            {% endif %}
+          </label>
+          <label>
+            <div class="label">留言（可选）</div>
+            <input name="message" maxlength="240" placeholder="写一句鼓励的话…" />
+          </label>
+          <input type="hidden" name="currency" value="{{ 'CNY' if mode=='cn' else 'HKD' }}" />
+          <div class="row">
+            <button class="btn primary" type="submit">确认支持并获得感谢卡</button>
+            <button class="btn" type="button" onclick="closeTip()">取消</button>
+          </div>
+          <div class="hint">
+            支持后会在你的卡包里出现“感谢卡”。金额越高卡片稀有度越高（common/rare/epic）。\n
+            {% if mode == 'cn' %}
+              CN 模式：生产环境需对接大陆合规支付服务商/服务商模式；本演示为占位模拟。
+            {% else %}
+              HK/Global 模式：生产环境可对接 Stripe/Airwallex 等平台分账；本演示为占位模拟。
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tipOverlay = document.getElementById('tipOverlay');
+    const tipCreatorId = document.getElementById('tipCreatorId');
+    const tipCreatorName = document.getElementById('tipCreatorName');
+    function openTip(id, name){
+      tipCreatorId.value = id;
+      tipCreatorName.textContent = name;
+      tipOverlay.style.display = 'flex';
+    }
+    function closeTip(){
+      tipOverlay.style.display = 'none';
+    }
+
+    const liveFeed = document.getElementById('liveFeed');
+    function addFeedLine(text){
+      const div = document.createElement('div');
+      div.className = 'feedline';
+      div.textContent = text;
+      liveFeed.prepend(div);
+    }
+
+    const seed = {{ (tips or [])|tojson }};
+    seed.slice(0, 8).forEach(t => addFeedLine(`支持：${t.currency} ${t.amount}`));
+
+    const wsUrl = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat?room=global`;
+    const ws = new WebSocket(wsUrl);
+    ws.onmessage = (ev) => {
+      try{
+        const data = JSON.parse(ev.data);
+        if(data.type === 'event' && data.event === 'tip_created'){
+          addFeedLine(`实时支持：${data.currency} ${data.amount}`);
+        }
+      }catch{}
+    };
+  </script>
+{% endblock %}
+

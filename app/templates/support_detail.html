@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% set title = "support - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">support</div>
+    <div class="panel-body">
+      <div class="row between">
+        <div class="pill">ID：<span class="mono">{{ item.id }}</span></div>
+        <span class="shareWrap">
+          <button class="iconbtn" id="shareBtn" type="button" aria-label="分享链接">⤴</button>
+          <span class="shareTip" role="tooltip">复制链接</span>
+        </span>
+      </div>
+      <div class="posttitle" style="margin-top:10px;">{{ item.title }}</div>
+      {% if item.story %}<div class="postbody" style="margin-top:8px;">{{ item.story }}</div>{% endif %}
+      {% if item.needHelp %}<div class="postbody" style="margin-top:8px;"><strong>需要帮助：</strong>{{ item.needHelp }}</div>{% endif %}
+      <div class="hint" style="margin-top:10px;">
+        联系方式：
+        {% if item.contactPublic and item.contact %}
+          <span class="mono">{{ item.contact }}</span>
+        {% else %}
+          未公开
+        {% endif %}
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <a class="btn" href="{{ ownerCardUrl }}">打开TA名片</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('shareBtn');
+      const tip = btn && btn.parentElement ? btn.parentElement.querySelector('.shareTip') : null;
+      if (!btn) return;
+      const getLink = () => { try { return String(location.href); } catch { return ''; } };
+      async function copy(text) {
+        if (!text) return false;
+        try { await navigator.clipboard.writeText(text); return true; } catch {}
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px';
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          return !!ok;
+        } catch {}
+        return false;
+      }
+      btn.addEventListener('click', async () => {
+        const link = getLink();
+        const original = tip ? tip.textContent : '';
+        const ok = await copy(link);
+        if (tip) tip.textContent = ok ? '已复制' : '复制失败';
+        setTimeout(() => { if (tip) tip.textContent = original; }, 1200);
+      });
+    })();
+  </script>
+{% endblock %}
+

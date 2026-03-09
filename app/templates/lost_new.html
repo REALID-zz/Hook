@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% set title = "发布失物/招领 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">发布（{{ kind }}）- {{ venue.name if venue else "未选择" }}</div>
+    <div class="panel-body">
+      <form method="post" action="/lost/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <input type="hidden" name="type" value="{{ kind }}" />
+        <label>
+          <div class="label">标题</div>
+          <input name="title" placeholder="例如：手机丢了 / 捡到卡包" required />
+        </label>
+        <label>
+          <div class="label">描述</div>
+          <textarea name="body" rows="5" placeholder="时间窗口、物品特征、验证问题建议（例如：壳子贴纸/卡包编号尾号）"></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">发布</button>
+          <a class="btn" href="/lost?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+        <div class="hint">发布后会给你推荐“可能匹配”的帖子（同场所+时间窗口+相似描述）。</div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

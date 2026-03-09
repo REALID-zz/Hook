@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% set title = "ID card - Ahelpis一海" %}
+{% set bodyClass = "entry" %}
+
+{% block content %}
+  <div class="entryWrap">
+    <div class="foilGreet" id="foilGreet" aria-hidden="true">
+      <div>We gottta one pass for U:)</div>
+      <div class="foilGreetSub">hope U doing welll (:</div>
+    </div>
+
+    <section class="passportCard" aria-label="Ahelpis ID card" id="passportCard">
+      <div class="passportGlow" aria-hidden="true"></div>
+
+      <header class="passportTop">
+        <div class="passportBrand">
+          <span class="passportEn">Ahelpis</span>
+          <span class="passportCn">一海</span>
+        </div>
+        <div class="passportTags">
+          <button class="passportTag passportTagBtn" id="infoToggle" type="button" aria-controls="passportInfo" aria-expanded="false">
+            INFO
+          </button>
+        </div>
+      </header>
+
+      <div class="passportMain">
+        <div class="passportName">{{ displayName or "Name" }}</div>
+        <div class="passportTitle">{{ titleLine or "Title" }}</div>
+
+        <div class="passportIdLine">
+          <span class="passportIdK">ID</span>
+          <span class="passportIdV mono">{{ personId }}</span>
+        </div>
+
+        <div class="passportMeta" id="passportInfo" hidden>
+          <div class="passportRow">
+            <div class="passportK">Area</div>
+            {% set m = mode|default('global') %}
+            <div class="passportV">{{ "Global" if m == "global" else m|upper }}</div>
+          </div>
+          <div class="passportRow">
+            <div class="passportK">Venue</div>
+            <div class="passportV">{{ venue.name }}{% if venue.city %} · {{ venue.city }}{% endif %}</div>
+          </div>
+
+          <div class="passportEdit">
+            <div class="passportEditHint">输入你的名字（建议真实姓名）。后续将接入身份验证。</div>
+            <form class="form passportForm" method="post" action="/identity">
+              <input type="hidden" name="mode" value="{{ mode|default('global') }}" />
+              <input type="hidden" name="venue" value="{{ venue.id }}" />
+
+              <label>
+                <div class="label">Name（姓名）</div>
+                <input name="displayName" placeholder="请输入你的名字" value="{{ displayName|default('') }}" autocomplete="name" />
+              </label>
+              <label>
+                <div class="label">Title（头衔）</div>
+                <input name="titleLine" placeholder="例如：Architect / Designer / Lawyer" value="{{ titleLine|default('') }}" />
+              </label>
+              <label>
+                <div class="label">姓名是否公示</div>
+                <select class="select" name="namePublic">
+                  <option value="0" {% if (namePublic|default(0)|int) == 0 %}selected{% endif %}>不公示（仅自己可见）</option>
+                  <option value="1" {% if (namePublic|default(0)|int) == 1 %}selected{% endif %}>公示（对外展示）</option>
+                </select>
+              </label>
+
+              <div class="passportVerifyRow">
+                <span class="badge">身份验证：{% if verified == 'verified' %}已验证{% elif verified == 'pending' %}进行中{% else %}未验证{% endif %}</span>
+              </div>
+
+              <div class="row">
+                <button class="btn primary" type="submit">保存</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <footer class="passportActions">
+        {% set qp = "?mode=" ~ (mode|default('global')) ~ "&venue=" ~ venue.id %}
+        <a class="btn primary" href="/help{{ qp }}#helpis">getting</a>
+        <a class="btn" href="/profile{{ qp }}">My world</a>
+        <a class="btn" href="/card/{{ personId }}{{ qp }}">ID</a>
+        <a class="btn" href="/universe{{ qp }}">Universe</a>
+      </footer>
+    </section>
+
+    <div class="foilTagline" id="foilTagline" aria-label="tagline">{{ tagline|default('') }}</div>
+  </div>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('infoToggle');
+      const box = document.getElementById('passportInfo');
+      const greet = document.getElementById('foilGreet');
+      const tagline = document.getElementById('foilTagline');
+      if (!btn || !box) return;
+      const setOpen = (open) => {
+        box.hidden = !open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        try{
+          document.body.classList.toggle('passportInfoOpen', !!open);
+        }catch{}
+        // After layout changes, re-place the floating texts (if still visible)
+        try{
+          if (typeof window.__ahelpis_placePassport === 'function') {
+            window.__ahelpis_placePassport();
+            setTimeout(window.__ahelpis_placePassport, 30);
+          }
+        }catch{}
+        // If INFO is open, don't block registration UI
+        try{
+          if (greet) greet.setAttribute('aria-hidden', open ? 'true' : 'false');
+          if (tagline) tagline.setAttribute('aria-hidden', open ? 'true' : 'false');
+        }catch{}
+      };
+      setOpen(false);
+      btn.addEventListener('click', () => setOpen(box.hidden));
+    })();
+
+    (() => {
+      const greet = document.getElementById('foilGreet');
+      const tagline = document.getElementById('foilTagline');
+      const card = document.getElementById('passportCard');
+      if (!greet || !card) return;
+      const place = () => {
+        try{
+          if (document.body.classList.contains('passportInfoOpen')) return;
+        }catch{}
+        const r = card.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        // Place greet ABOVE the card using its own height (avoids overlap when font grows)
+        const gh = greet.getBoundingClientRect().height || 0;
+        const y = Math.max(10, r.top - gh - 12);
+        greet.style.left = `${cx}px`;
+        greet.style.top = `${y}px`;
+        if(tagline){
+          tagline.style.left = `${Math.max(10, r.left)}px`;
+          tagline.style.top = `${Math.min(window.innerHeight - 40, r.bottom + 12)}px`;
+          tagline.style.width = `${Math.max(240, r.width)}px`;
+        }
+      };
+      // expose for the INFO toggle
+      window.__ahelpis_placePassport = place;
+      place();
+      window.addEventListener('resize', place, { passive: true });
+      setTimeout(place, 50);
+      setTimeout(place, 250);
+    })();
+  </script>
+{% endblock %}
+

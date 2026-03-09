@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set title = "失物招领 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">失物招领大厅（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/lost/new?type=lost&venue={{ venue.id if venue else '' }}">我丢了</a>
+        <a class="btn primary" href="/lost/new?type=found&venue={{ venue.id if venue else '' }}">我捡到</a>
+        <a class="btn" href="/messages?room=venue:{{ venue.id if venue else '' }}">匿名沟通（示例）</a>
+      </div>
+      <div class="hint">首版：场所ID+时间窗口匹配；不做持续定位。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">列表</div>
+    <div class="panel-body">
+      {% if posts %}
+        <ul class="postlist">
+          {% for p in posts %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">{{ p.type }}</span>
+                <span class="muted">{{ p.startAt }} → {{ p.endAt }}</span>
+              </div>
+              <div class="posttitle">{{ p.title }}</div>
+              <div class="postbody">{{ p.body }}</div>
+              <div class="hint">建议验证：2-3个只有失主知道的问题 + 局部图</div>
+              <div class="hint">
+                <a class="link" href="#" onclick="return loadSuggest('{{ p.id }}')">查看可能匹配</a>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="panel" id="suggestPanel" style="display:none;">
+          <div class="panel-title">可能匹配（同场所）</div>
+          <div class="panel-body" id="suggestBody"></div>
+        </div>
+      {% else %}
+        <div class="muted">暂时没有失物信息。</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    const venueId = {{ (venue.id if venue else '')|tojson }};
+    const suggestPanel = document.getElementById('suggestPanel');
+    const suggestBody = document.getElementById('suggestBody');
+    async function loadSuggest(postId){
+      suggestBody.textContent = '加载中…';
+      suggestPanel.style.display = 'block';
+      const res = await fetch(`/api/lost/suggestions?venueId=${encodeURIComponent(venueId)}&postId=${encodeURIComponent(postId)}`);
+      const data = await res.json();
+      if(!Array.isArray(data) || data.length === 0){
+        suggestBody.textContent = '暂无匹配建议。';
+        return false;
+      }
+      suggestBody.innerHTML = data.map(x => `
+        <div class="postitem">
+          <div class="postmeta"><span class="badge">${x.type}</span><span class="muted">score=${x.score}</span></div>
+          <div class="posttitle">${x.title}</div>
+          <div class="postbody">${x.body}</div>
+        </div>
+      `).join('');
+      return false;
+    }
+  </script>
+{% endblock %}
+

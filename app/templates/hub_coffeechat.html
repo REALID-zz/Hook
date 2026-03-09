@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% set title = "public loby - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel" id="loby">
+    <div class="panel-title">
+      <span class="duoText"><span class="en">public loby</span><span class="cn">大厅</span></span>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/coffee?venue={{ venue.id if venue else '' }}">coffee</a>
+        <a class="btn" href="/coffee/new?venue={{ venue.id if venue else '' }}">new</a>
+        <a class="btn" href="/messages?room=venue:{{ venue.id if venue else '' }}">messages</a>
+      </div>
+      <div class="hint">入口聚合：用户使用时才需要看到。</div>
+    </div>
+  </div>
+
+  <div class="panel" id="publicWellDone">
+    <div class="panel-title">public well done</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/public">public well done</a>
+        <a class="btn" href="/charity"><span class="duoText"><span class="en">news</span><span class="cn">资讯</span></span></a>
+        <a class="btn" href="/safety">公开明示</a>
+        <a class="btn" href="/lost?venue={{ venue.id if venue else '' }}">lost</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="otherHelps">
+    <div class="panel-title">help / services</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/legal?venue={{ venue.id if venue else '' }}">legal</a>
+        <a class="btn" href="/support-sell?venue={{ venue.id if venue else '' }}">support/sell</a>
+        <a class="btn" href="/robot4s?venue={{ venue.id if venue else '' }}">机器人4S店</a>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <a class="btn" href="/pets?venue={{ venue.id if venue else '' }}">BBEats</a>
+        <a class="btn" href="/pets/new?venue={{ venue.id if venue else '' }}">BBEats new</a>
+        <a class="btn" href="/companion?venue={{ venue.id if venue else '' }}">ForYou</a>
+        <a class="btn" href="/companion/new?venue={{ venue.id if venue else '' }}">ForYou new</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% set title = "收到邀请 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">有人当场邀请你加入（同场所临时聊天）</div>
+    <div class="panel-body">
+      <div class="nowbox">
+        <div class="muted small">
+          这是一次性邀请：只有你点“同意”才会进入聊天。不同意就不会发生任何互动。
+          <br />如你觉得被骚扰，可直接投诉（平台可追责邀请者）。
+        </div>
+        {% if note %}
+          <div class="aiAnswer" style="margin-top:10px;">{{ note }}</div>
+        {% endif %}
+        <div class="row" style="margin-top:10px;">
+          <span class="badge">场所：{{ venue.name if venue else '' }}</span>
+          {% if expiresAt %}<span class="badge">有效期：{{ expiresAt }}</span>{% endif %}
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <form method="post" action="/invite/{{ token }}/accept">
+          <button class="btn primary" type="submit">同意并进入聊天</button>
+        </form>
+        <form method="post" action="/invite/{{ token }}/decline">
+          <button class="btn" type="submit">拒绝</button>
+        </form>
+        <details class="panel" style="margin-left:auto;">
+          <summary class="panel-title">投诉骚扰</summary>
+          <div class="panel-body">
+            <form method="post" action="/invite/{{ token }}/complain" class="form">
+              <label>
+                <div class="label">原因</div>
+                <select name="reason" class="select">
+                  <option value="harassment">骚扰/不适</option>
+                  <option value="spam">垃圾邀请</option>
+                  <option value="unsafe">安全风险</option>
+                  <option value="other">其他</option>
+                </select>
+              </label>
+              <button class="btn danger" type="submit">提交投诉</button>
+            </form>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

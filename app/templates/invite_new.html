@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% set title = "询问next - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">询问next（选择模式）</div>
+    <div class="panel-body">
+      <div class="nowbox">
+        <div class="muted small">
+          你可以只问一个问题（不进入实时互动），也可以发起实时互动（需要实名 + 协议）。
+          <br />实时互动：对方必须当场扫码并点“同意”，才会进入聊天；每天最多 1 次；若被投诉，7 天内不能再次发起。
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <span class="badge">今日剩余：{{ quotaLeft }}/1</span>
+          {% if blocked %}
+            <span class="badge">已被投诉·暂时禁用</span>
+          {% endif %}
+          {% if not realtimeReady %}
+            <span class="badge">未实名：只能使用“只问问题”</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="splitBoard" style="margin-top:12px;">
+        <div class="splitLeft">
+          <div class="panel">
+            <div class="panel-title">只问问题（免实名 · 不进入实时互动）</div>
+            <div class="panel-body">
+              {% if ask %}
+                <div class="qrBox">
+                  <canvas id="qrAsk" width="220" height="220" aria-label="ask qr"></canvas>
+                </div>
+                <div class="hint">给对方扫码/点开即可回应（不建立聊天）。</div>
+                <div class="codeLine mono" id="askUrl">{{ askUrl }}</div>
+                <div class="aiAnswer" style="margin-top:10px;">{{ ask.question }}</div>
+                <div class="row" style="margin-top:10px;">
+                  <button class="btn primary" type="button" id="copyAskBtn">复制链接</button>
+                  <button class="btn" type="button" id="shareAskBtn">系统分享</button>
+                  <span class="badge">有效期：约 10 分钟</span>
+                </div>
+
+                {% if ask.replies and ask.replies|length > 0 %}
+                  <div style="margin-top:12px; font-weight:900;">对方回应（最近）</div>
+                  <ul class="postlist" style="margin-top:8px;">
+                    {% for r in ask.replies %}
+                      <li class="postitem">
+                        <div class="postmeta">
+                          <span class="badge">{{ r.by }}</span>
+                          <span class="badge">选择：{{ r.choice }}</span>
+                        </div>
+                        {% if r.message %}
+                          <div class="postbody">{{ r.message }}</div>
+                        {% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="hint" style="margin-top:12px;">暂无回应。</div>
+                {% endif %}
+              {% else %}
+                <form method="post" action="/invite/new" class="form">
+                  <input type="hidden" name="flow" value="ask" />
+                  <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+                  <label>
+                    <div class="label">你想问什么？</div>
+                    <input name="question" maxlength="240" placeholder="例如：你愿意试一下这个应用吗？" />
+                  </label>
+                  <div class="row">
+                    <button class="btn primary" type="submit">生成“只问问题”二维码</button>
+                    <a class="btn" href="/universe?venue={{ venue.id if venue else '' }}">回到 Universe</a>
+                  </div>
+                  <div class="hint">这个模式不需要实名，也不会进入聊天。</div>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="splitRight">
+          <div class="panel">
+            <div class="panel-title">实时互动（需实名 + 协议）</div>
+            <div class="panel-body">
+              <details class="panel">
+                <summary class="panel-title">点开查看协议（实时互动）</summary>
+                <div class="panel-body">
+                  <div class="muted small">
+                    1) 你确认对方是当场在你附近的人，不进行线上骚扰或“批量邀请”。<br />
+                    2) 对方必须主动扫码并点“同意”才会进入聊天；不同意不会发生任何互动。<br />
+                    3) 你同意平台记录你的实名留档用于追责（默认不公开展示）。<br />
+                    4) 一旦被投诉，平台可限制你再次发起；情节严重将封禁。<br />
+                    5) 请勿索取敏感信息；涉及安全风险请使用举报/工单流程。
+                  </div>
+                </div>
+              </details>
+
+              {% if invite %}
+                <div class="qrBox" style="margin-top:10px;">
+                  <canvas id="qrMeet" width="220" height="220" aria-label="invite qr"></canvas>
+                </div>
+                <div class="hint">
+                  对方手机扫码打不开，多半是你用的不是局域网 IP。下面这个链接是可给别人访问的版本。
+                </div>
+                <div class="codeLine mono" id="meetUrl">{{ shareUrl }}</div>
+                <div class="row" style="margin-top:10px;">
+                  <button class="btn primary" type="button" id="copyMeetBtn">复制链接</button>
+                  <button class="btn" type="button" id="shareMeetBtn">系统分享</button>
+                  <a class="btn" href="/messages?room={{ invite.room|urlencode }}">直接进聊天房间</a>
+                </div>
+                <div class="hint">有效期：约 8 分钟（过期需重新生成）。</div>
+                <div class="nowbox" style="margin-top:12px;">
+                  <div class="muted small">本机访问（仅你自己电脑）：</div>
+                  <div class="codeLine mono">{{ localOrigin }}/invite/{{ invite.token }}</div>
+                </div>
+              {% else %}
+                <form method="post" action="/invite/new" class="form" style="margin-top:10px;">
+                  <input type="hidden" name="flow" value="meet" />
+                  <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+                  <label>
+                    <div class="label">一句话（可选）</div>
+                    <input name="note" maxlength="160" placeholder="例如：我在用一个同场所的临时聊天，想不想试一下？" />
+                  </label>
+                  <label style="display:flex; gap:10px; align-items:flex-start;">
+                    <input type="checkbox" name="agree" value="1" />
+                    <div class="muted small">我已阅读并同意“实时互动协议”。</div>
+                  </label>
+                  <div class="row">
+                    <button class="btn primary" type="submit" {% if quotaLeft <= 0 or blocked or (not realtimeReady) %}disabled{% endif %}>生成实时互动二维码（今日仅一次）</button>
+                    {% if not realtimeReady %}
+                      <a class="btn" href="/realname?venue={{ venue.id if venue else '' }}&next={{ ('/invite/new?venue=' ~ (venue.id if venue else ''))|urlencode }}">去实名启用</a>
+                    {% endif %}
+                  </div>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    (() => {
+      function safeText(id){
+        const el = document.getElementById(id);
+        return el ? String(el.textContent || '').trim() : '';
+      }
+      async function copy(url){
+        if (!url) return;
+        try{
+          await navigator.clipboard.writeText(url);
+          alert('已复制');
+        }catch{
+          prompt('复制这个链接：', url);
+        }
+      }
+      async function share(url, title){
+        if (!url) return;
+        try{
+          if (navigator.share) await navigator.share({ title: title || 'Ahelpis', text: '扫码/点开即可进入', url });
+          else await copy(url);
+        }catch{}
+      }
+
+      const askUrl = safeText('askUrl');
+      const meetUrl = safeText('meetUrl');
+
+      const cAsk = document.getElementById('qrAsk');
+      const cMeet = document.getElementById('qrMeet');
+      if (window.QRCode){
+        try{ if (cAsk && askUrl) window.QRCode.toCanvas(cAsk, askUrl, { margin: 1, width: 220 }, () => {}); }catch{}
+        try{ if (cMeet && meetUrl) window.QRCode.toCanvas(cMeet, meetUrl, { margin: 1, width: 220 }, () => {}); }catch{}
+      }
+
+      const copyAskBtn = document.getElementById('copyAskBtn');
+      const shareAskBtn = document.getElementById('shareAskBtn');
+      const copyMeetBtn = document.getElementById('copyMeetBtn');
+      const shareMeetBtn = document.getElementById('shareMeetBtn');
+
+      if (copyAskBtn) copyAskBtn.addEventListener('click', () => copy(askUrl));
+      if (shareAskBtn) shareAskBtn.addEventListener('click', () => share(askUrl, 'Ahelpis 只问问题'));
+      if (copyMeetBtn) copyMeetBtn.addEventListener('click', () => copy(meetUrl));
+      if (shareMeetBtn) shareMeetBtn.addEventListener('click', () => share(meetUrl, 'Ahelpis 实时互动邀请'));
+    })();
+  </script>
+{% endblock %}
+

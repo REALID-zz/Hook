@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set title = "提交法律工单 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">提交法律工单（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <form method="post" action="/legal/ticket/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <label>
+          <div class="label">工单类型</div>
+          <select name="kind" class="select">
+            <option value="pro_bono">公益（限时免费）</option>
+            <option value="referral">转介（你自行与律师交易）</option>
+            <option value="paid">付费委托（占位）</option>
+          </select>
+        </label>
+        <label>
+          <div class="label">问题方向</div>
+          <select name="topic" class="select">
+            <option value="harassment">骚扰/侮辱/诽谤</option>
+            <option value="consumer">消费纠纷/商家争议</option>
+            <option value="contract">合同/交易纠纷</option>
+            <option value="privacy">隐私侵权/人肉</option>
+            <option value="other">其他</option>
+          </select>
+        </label>
+        <label>
+          <div class="label">一句话描述</div>
+          <input name="summary" maxlength="240" placeholder="例如：同场所互动被持续骚扰，想要律师建议" required />
+        </label>
+        <label>
+          <div class="label">详情（可选）</div>
+          <textarea name="details" rows="7" placeholder="请描述事实经过、时间窗口、场所；不要粘贴身份证/银行卡/验证码等敏感信息。"></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">提交</button>
+          <a class="btn" href="/legal?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+        <div class="hint">提交后会生成工单编号，进入队列等待分发。</div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

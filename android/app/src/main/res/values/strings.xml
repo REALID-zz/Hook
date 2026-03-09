@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ahelpis</string>
+    <string name="title_activity_main">Ahelpis</string>
+    <string name="package_name">com.ahelpis.app</string>
+    <string name="custom_url_scheme">com.ahelpis.app</string>
+</resources>

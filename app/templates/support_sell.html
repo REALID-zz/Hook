@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set title = "support/sell - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">support / sell</div>
+    <div class="panel-body">
+      <div class="hubgrid">
+        <a class="hubcard" href="/support?venue={{ venue.id if venue else '' }}">
+          <div class="hubtitle">support</div>
+          <div class="hubdesc muted small">作品支持 / 求助</div>
+          <div class="row" style="margin-top:10px;">
+            <span class="badge">作品</span>
+            <span class="badge">缘由</span>
+            <span class="badge">需要帮助</span>
+          </div>
+        </a>
+        <a class="hubcard" href="/sell?venue={{ venue.id if venue else '' }}">
+          <div class="hubtitle">sell</div>
+          <div class="hubdesc muted small">二手售卖</div>
+          <div class="row" style="margin-top:10px;">
+            <span class="badge">像咸鱼</span>
+            <span class="badge">简单发布</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

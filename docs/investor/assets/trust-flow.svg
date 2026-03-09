@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-label="Ahelpis Yihai trust and data flow">
+  <defs>
+    <style>
+      :root{color-scheme:light;}
+      .bg{fill:#ffffff;}
+      .box{fill:#fbfbfc;stroke:#151515;stroke-width:2;rx:18;ry:18;}
+      .box2{fill:#ffffff;stroke:#151515;stroke-width:2;rx:16;ry:16;}
+      .gold{fill:#c7a04a;}
+      .t0{font:700 30px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;fill:#111;}
+      .t1{font:700 20px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;fill:#111;}
+      .t2{font:500 16px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;fill:#4a4a4a;}
+      .mono{font:600 14px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New";fill:#111;}
+      .arrow{stroke:#151515;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+      .dash{stroke:#151515;stroke-width:2;fill:none;stroke-dasharray:6 6;stroke-linecap:round;}
+      .tag{fill:#111;}
+      .tagText{font:700 13px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New";fill:#fff;letter-spacing:.06em;}
+    </style>
+    <marker id="mArrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
+      <path d="M1,1 L13,7 L1,13" fill="none" stroke="#151515" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="820"/>
+  <text class="t0" x="60" y="78">Trust Model - Privacy, Safety, Traceability</text>
+  <text class="t2" x="60" y="112">Design principle: user chooses visibility; realtime content is short-lived; public news is traceable to sources.</text>
+
+  <!-- Input -->
+  <rect class="box" x="80" y="170" width="420" height="250"/>
+  <circle class="gold" cx="118" cy="218" r="10"/>
+  <text class="t1" x="144" y="224">User inputs</text>
+  <text class="t2" x="118" y="258">ID card fields: name / title</text>
+  <text class="t2" x="118" y="284">Realtime posts: templates, invites</text>
+  <text class="t2" x="118" y="310">Location: venue detection (optional)</text>
+  <text class="mono" x="118" y="350">Note: geolocation needs HTTPS</text>
+  <rect class="tag" x="118" y="366" width="190" height="34" rx="999" ry="999"/>
+  <text class="tagText" x="136" y="388">consent-first</text>
+
+  <!-- Privacy choices -->
+  <rect class="box2" x="560" y="150" width="360" height="140"/>
+  <circle class="gold" cx="596" cy="192" r="8"/>
+  <text class="t1" x="618" y="198">Privacy controls</text>
+  <text class="t2" x="596" y="232">Name public / hidden</text>
+  <text class="t2" x="596" y="258">ID card: public / venue_verified / private</text>
+
+  <!-- Safety layer -->
+  <rect class="box2" x="560" y="320" width="360" height="150"/>
+  <circle class="gold" cx="596" cy="362" r="8"/>
+  <text class="t1" x="618" y="368">Safety layer</text>
+  <text class="t2" x="596" y="402">Text moderation (basic filter)</text>
+  <text class="t2" x="596" y="428">Report / safety entry</text>
+  <rect class="tag" x="596" y="440" width="178" height="30" rx="999" ry="999"/>
+  <text class="tagText" x="614" y="460">clean &amp; credible</text>
+
+  <!-- Outputs -->
+  <rect class="box" x="980" y="170" width="340" height="250"/>
+  <circle class="gold" cx="1016" cy="218" r="10"/>
+  <text class="t1" x="1042" y="224">Outputs</text>
+  <text class="t2" x="1016" y="258">ID card link (shareable)</text>
+  <text class="t2" x="1016" y="284">Helpis presence + invites</text>
+  <text class="t2" x="1016" y="310">Public modules: safety / lost</text>
+  <text class="t2" x="1016" y="336">News: title + quote + source link</text>
+  <rect class="tag" x="1016" y="356" width="248" height="34" rx="999" ry="999"/>
+  <text class="tagText" x="1034" y="378">traceable sources</text>
+
+  <!-- Realtime vs Public split -->
+  <rect class="box2" x="260" y="500" width="880" height="230"/>
+  <text class="t1" x="300" y="548">Layering strategy</text>
+
+  <rect class="box2" x="300" y="575" width="390" height="130"/>
+  <text class="t1" x="330" y="612">Realtime (Helpis)</text>
+  <text class="t2" x="330" y="642">Venue-level, short lived</text>
+  <text class="t2" x="330" y="668">Refresh when visible (power-aware)</text>
+
+  <rect class="box2" x="740" y="575" width="370" height="130"/>
+  <text class="t1" x="770" y="612">Public (well done + news)</text>
+  <text class="t2" x="770" y="642">Longer-lived, clearer entry</text>
+  <text class="t2" x="770" y="668">News links back to originals</text>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M500,290 C530,290 540,240 560,220" marker-end="url(#mArrow)"/>
+  <path class="arrow" d="M500,320 C530,330 540,360 560,380" marker-end="url(#mArrow)"/>
+  <path class="arrow" d="M920,220 C945,220 955,220 980,220" marker-end="url(#mArrow)"/>
+  <path class="dash" d="M740,470 C740,495 700,510 650,520" marker-end="url(#mArrow)"/>
+  <path class="dash" d="M980,470 C980,495 1020,510 1060,520" marker-end="url(#mArrow)"/>
+</svg>

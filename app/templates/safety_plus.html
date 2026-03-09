@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set title = "安全Plus - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">安全Plus（付费）</div>
+    <div class="panel-body">
+      <div class="hint">
+        这里的“付费”不是为了曝光别人，而是覆盖平台核实与风控成本。\n
+        我们只提供：更细的安全提示、场所风险热力摘要、已核实通报的高级筛选（仍然去标识化）。\n
+        原型阶段：先展示UI与能力边界，暂不接真实支付。
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">你将获得（示例）</div>
+    <div class="panel-body">
+      <ul class="list">
+        <li>已核实风险通报：按场所/类型/时间窗口筛选</li>
+        <li>私聊防诈骗提示增强（更严格的拦截与提醒）</li>
+        <li>“安全优先匹配”：优先匹配高声誉用户</li>
+      </ul>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn primary" type="button" onclick="alert('原型：后续接支付')">订阅 HKD 19/月（占位）</button>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

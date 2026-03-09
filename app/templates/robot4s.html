@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set title = "机器人4S店 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="duoText"><span class="en">Robot 4S</span><span class="cn">机器人4S店</span></span>
+    </div>
+    <div class="panel-body">
+      <div class="muted small">专门放机器人相关：购买/二手/维修保养/配件/教程。默认只到场所粒度，不上传精确定位。</div>
+
+      <div class="row" style="margin-top:10px;">
+        {% set v = (venue.id if venue else '') %}
+        <a class="btn primary" href="/interact/new?venue={{ v }}&scope=keep&title={{ '【机器人】维修/保养'|urlencode }}&body={{ '需求：\\n型号：\\n预算：\\n时间：\\n规则：公共场所/不转账'|urlencode }}">发布维修/保养</a>
+        <a class="btn" href="/interact/new?venue={{ v }}&scope=keep&title={{ '【机器人】二手交易'|urlencode }}&body={{ '出售/求购：\\n型号：\\n成色：\\n价格：\\n交付方式：当面'|urlencode }}">发布二手</a>
+        <a class="btn" href="/interact/new?venue={{ v }}&scope=keep&title={{ '【机器人】配件/耗材'|urlencode }}&body={{ '需要/出：\\n配件名：\\n型号规格：\\n数量：\\n备注：'|urlencode }}">发布配件</a>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">提示：帖子标题建议统一带“【机器人】”，方便聚合展示。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">当前场所 · 最近机器人相关</div>
+    <div class="panel-body">
+      {% if posts and posts|length %}
+        <ul class="postlist">
+          {% for p in posts %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">{{ p.scope }}</span>
+                <span class="muted small">#{{ p.id }} · {{ p.createdAt }}</span>
+              </div>
+              <div class="posttitle">{{ p.title }}</div>
+              {% if p.body %}<div class="postbody muted small">{{ p.body }}</div>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">暂无机器人相关内容。你可以用上面的按钮发布第一条。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

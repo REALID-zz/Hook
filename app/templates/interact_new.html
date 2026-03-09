@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% set title = "发布邀约 - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">发布邀约（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <form method="post" action="/interact/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        {% set s = (request.query_params.get('scope') if request and request.query_params else '') %}
+        {% set qTitle = (request.query_params.get('title') if request and request.query_params else '') %}
+        {% set qBody = (request.query_params.get('body') if request and request.query_params else '') %}
+        <label>
+          <div class="label">时效</div>
+          <div class="row" style="flex-wrap:wrap; gap:10px;">
+            <label class="pill" style="display:flex; align-items:center; gap:8px;">
+              <input type="radio" name="scope" value="now" {% if s == 'now' %}checked{% endif %} />
+              <span><strong>Now</strong>（30 mins）</span>
+            </label>
+            <label class="pill" style="display:flex; align-items:center; gap:8px;">
+              <input type="radio" name="scope" value="keep" {% if s != 'now' %}checked{% endif %} />
+              <span><strong>Keep</strong>（1 hour）</span>
+            </label>
+          </div>
+        </label>
+        <label>
+          <div class="label">标题</div>
+          <input name="title" placeholder="例如：一起吃饭/一起画画/一起聊项目" value="{{ qTitle|default('')|e }}" required />
+        </label>
+        <label>
+          <div class="label">说明</div>
+          <textarea name="body" rows="4" placeholder="写清楚时间窗口、人数、规则与安全提醒">{{ qBody|default('')|e }}</textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">发布</button>
+          <a class="btn" href="/help?venue={{ venue.id if venue else '' }}#helpis">取消</a>
+        </div>
+        <div class="hint">Now/Keep 决定可见时长。</div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

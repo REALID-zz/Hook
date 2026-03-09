@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set title = "市集交易 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">市集交易（线框）</div>
+    <div class="panel-body">
+      <div class="hint">首版会先做“浏览+模拟下单”；真实支付与抽成后续接入支付平台。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">商品/作品网格</div>
+    <div class="panel-body">
+      <div class="grid">
+        {% for i in range(12) %}
+          <div class="tile">
+            <div class="tile-thumb"></div>
+            <div class="tile-title">作品/商品 {{ i + 1 }}</div>
+            <div class="tile-meta muted">HKD 100</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% set title = "紧急事件 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="warnTri warnTriRed" aria-hidden="true">!</span>
+      紧急事件（可追溯记录）
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn danger" href="/emergency/new?venue={{ venue.id if venue else '' }}">发起求助（失踪等）</a>
+        <a class="btn" href="/public?venue={{ venue.id if venue else '' }}">返回公共价值</a>
+      </div>
+      <div class="hint">
+        用于周边紧急求助（例如：小朋友/老人失踪）。周围任何人都可以提交“现场照片 + 讯息”作为线索，便于后续对接官方处理。
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">当前场所：{{ venue.name if venue else '' }}</div>
+    <div class="panel-body">
+      {% if cases and cases|length %}
+        <ul class="postlist">
+          {% for c in cases %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">{{ c.kind }}</span>
+                <span class="muted small">#{{ c.id }} · {{ c.status }} · {{ c.createdAt }}</span>
+              </div>
+              <div class="posttitle">
+                <a href="/emergency/{{ c.id }}?venue={{ venue.id if venue else '' }}">{{ c.title }}</a>
+              </div>
+              {% if c.desc %}<div class="postbody muted small">{{ c.desc }}</div>{% endif %}
+              {% if c.recent and c.recent|length %}
+                <div class="hint" style="margin-top:8px;">最近线索：</div>
+                <ul class="list">
+                  {% for u in c.recent %}
+                    <li>
+                      <span class="muted small">{{ u.createdAt }}</span>
+                      {% if u.message %} · {{ u.message }}{% endif %}
+                      {% if u.hasPhoto %} · <span class="muted small">（有照片线索：已默认不公开）</span>{% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">当前暂无紧急事件记录。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

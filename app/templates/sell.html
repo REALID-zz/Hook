@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set title = "sell - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">sell（二手售卖）</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/sell/new?venue={{ venue.id if venue else '' }}">发布</a>
+      </div>
+      <div class="hint">像咸鱼：标题 + 价格 + 描述 +（可选）公开联系方式。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">列表</div>
+    <div class="panel-body">
+      {% if items and items|length %}
+        <ul class="postlist">
+          {% for x in items %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">sell</span>
+                <span class="badge">{{ x.currency }} {{ x.price }}</span>
+                {% if x.contactPublic %}<span class="badge">联系方式公开</span>{% endif %}
+                <span class="muted small">· {{ x.createdAt }}</span>
+              </div>
+              <div class="posttitle"><a href="/sell/{{ x.id }}?venue={{ venue.id if venue else '' }}">{{ x.title }}</a></div>
+              {% if x.description %}<div class="postbody">{{ x.description }}</div>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">暂无内容。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+

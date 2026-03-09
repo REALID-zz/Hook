@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% set title = "资讯 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="duoText"><span class="en">news</span><span class="cn">资讯</span></span>
+    </div>
+    <div class="panel-body">
+      <div class="row between" style="flex-wrap:wrap;">
+        <div class="muted small">day：<span class="mono">{{ day|default('') }}</span> · mode：<span class="mono">{{ mode|default('global') }}</span></div>
+        <button class="btn" id="bbRefreshBtn" type="button">⟳ refresh</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">像读书看报一样：标题 + 引用摘要 + 原文链接（可追溯）。</div>
+    </div>
+  </div>
+
+  <div class="ad-banner">
+    <div class="ad-banner-inner">
+      <div class="ad-banner-left">
+        <div class="ad-badge">OFFICIAL</div>
+        <div class="ad-title">daily news</div>
+        <div class="ad-desc muted small">updated：<span class="mono">{{ updatedAt|default('') }}</span></div>
+      </div>
+      <div class="ad-slot" style="flex:1; min-width:min(560px, 100%);">
+        {% if items and items|length %}
+          <ul class="postlist" style="border-top:none;">
+            {% for x in items %}
+              <li class="postitem" style="border-top:none; padding:12px 0;">
+                <div class="postmeta">
+                  {% if x.source %}<span class="badge">{{ x.source }}</span>{% endif %}
+                  {% if x.publishedAt %}<span class="muted small">· {{ x.publishedAt }}</span>{% endif %}
+                </div>
+                <div class="posttitle" style="margin-top:6px;">
+                  <a href="{{ x.url }}" target="_blank" rel="noopener noreferrer">{{ x.title }}</a>
+                </div>
+                {% if x.quote %}<div class="postbody muted small" style="margin-top:6px;">“{{ x.quote }}”</div>{% endif %}
+                {% if x.aiNote %}<div class="postbody" style="margin-top:6px;">{{ x.aiNote }}</div>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="muted">暂无资讯。点右上角 refresh 拉取一次。</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <details class="panel">
+    <summary class="panel-title">why / 合规</summary>
+    <div class="panel-body">
+      <div class="muted small">
+        只展示“标题 + 引用摘要 + 原文链接”。\n
+        自动更新默认关闭；上线后可用环境变量开启每日刷新。
+      </div>
+    </div>
+  </details>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('bbRefreshBtn');
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const old = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '…';
+        try{
+          const r = await fetch(`/api/billboard/refresh?mode=${encodeURIComponent('{{ mode|default("global") }}')}`, { method:'POST' });
+          const j = await r.json().catch(()=>({}));
+          if(!r.ok) throw new Error(j.detail || 'refresh_failed');
+          location.reload();
+        }catch(e){
+          alert(`refresh failed：${e.message || e}`);
+        }finally{
+          btn.disabled = false;
+          btn.textContent = old;
+        }
+      });
+    })();
+  </script>
+{% endblock %}
+

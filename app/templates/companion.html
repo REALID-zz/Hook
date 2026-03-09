@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set title = "陪伴师 / ForYou - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">陪伴师 / ForYou（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/companion/new?venue={{ venue.id if venue else '' }}">发布需求</a>
+        <a class="btn" href="/messages?room=venue:{{ venue.id if venue else '' }}">实时动态</a>
+      </div>
+      <div class="hint">
+        定位：学习/运动/就医/城市散步/看展等“非暧昧、非成人服务”。首版不展示精确住址与联系方式；请在公共区域会面，拒绝转账与验证码。
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">需求列表</div>
+    <div class="panel-body">
+      {% if posts %}
+        <ul class="postlist">
+          {% for p in posts %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">companion</span>
+                <span class="muted">{{ p.startAt }} → {{ p.endAt }}</span>
+              </div>
+              <div class="posttitle">{{ p.title }}</div>
+              <div class="postbody">{{ p.body }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">暂时没有需求。你可以先发布一条陪伴需求。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

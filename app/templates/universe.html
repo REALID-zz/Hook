@@ -1,0 +1,652 @@
+{% extends "base.html" %}
+{% set title = "Universe - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">Universe</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn" href="/map?venue={{ venue.id if venue else '' }}">map</a>
+        <a class="btn" href="/universe/wm?venue={{ venue.id if venue else '' }}">real world</a>
+      </div>
+      <div class="universeWrap" id="uniWrap">
+        <canvas class="universeCanvas" id="uni" data-venue-id="{{ venue.id if venue else '' }}"></canvas>
+        <div class="uniHud">
+          <div class="uniHint" id="uniHint">pretty close NPC</div>
+        </div>
+        <div class="uniPanel" id="uniPanel" style="display:none;">
+          <div class="uniPanelTop">
+            <div class="uniCode" id="pCode">—</div>
+            <button class="iconbtn" id="pClose" type="button">×</button>
+          </div>
+          <div class="uniTitle" id="pTitle">—</div>
+          <div class="uniSub" id="pSub">—</div>
+          <div class="uniBody" id="pBody"></div>
+          <div class="row" style="margin-top:10px;">
+            <a class="btn primary" id="pLink" href="#" style="display:none;">ID</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('uni');
+    const venueId = (canvas && canvas.dataset ? (canvas.dataset.venueId || '') : '');
+    const wrap = document.getElementById('uniWrap');
+    const hint = document.getElementById('uniHint');
+    const panel = document.getElementById('uniPanel');
+    const pCode = document.getElementById('pCode');
+    const pTitle = document.getElementById('pTitle');
+    const pSub = document.getElementById('pSub');
+    const pBody = document.getElementById('pBody');
+    const pLink = document.getElementById('pLink');
+    const pClose = document.getElementById('pClose');
+
+    const ctx = canvas.getContext('2d');
+    let W = 10, H = 10, DPR = 1;
+    let nodes = [];
+    let stars = [];
+    let meId = null;
+    let t0 = performance.now();
+    let ripples = [];
+    let pointer = { x: 0, y: 0, active: false, lastAt: 0, lastX: 0, lastY: 0 };
+
+    function resize(){
+      const r = wrap.getBoundingClientRect();
+      DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      W = Math.max(320, Math.floor(r.width));
+      H = Math.max(380, Math.floor(r.height));
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      buildStars();
+    }
+
+    function randSeed(s){
+      // xorshift-ish deterministic
+      let x = 0;
+      for(let i=0;i<s.length;i++) x = (x * 31 + s.charCodeAt(i)) >>> 0;
+      return function(){
+        x ^= x << 13; x >>>= 0;
+        x ^= x >> 17; x >>>= 0;
+        x ^= x << 5; x >>>= 0;
+        return (x >>> 0) / 4294967296;
+      }
+    }
+
+    function buildStars(){
+      const r = randSeed('Ahelpis_UNI_' + venueId);
+      stars = [];
+      const n = Math.floor((W*H) / 4200);
+      for(let i=0;i<n;i++){
+        stars.push({
+          x: r()*W,
+          y: r()*H,
+          // light background: use subtle graphite stardust
+          a: 0.06 + r()*0.22,
+          s: 0.4 + r()*1.4,
+        });
+      }
+    }
+
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+    function mixRGB(c1, c2, t){
+      t = clamp01(t);
+      return [
+        Math.round(lerp(c1[0], c2[0], t)),
+        Math.round(lerp(c1[1], c2[1], t)),
+        Math.round(lerp(c1[2], c2[2], t)),
+      ];
+    }
+    function rgb(c, a=1){ return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+
+    function roundRectPath(x,y,w,h,r){
+      const rr = Math.max(0, Math.min(r, Math.min(w,h)/2));
+      if(ctx.roundRect){
+        ctx.beginPath();
+        ctx.roundRect(x,y,w,h,rr);
+        return;
+      }
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+
+    function timePalette(){
+      const d = new Date();
+      const h = (d.getHours() + d.getMinutes()/60);
+      // 4 segments: dawn(6-10) -> day(10-17) -> dusk(17-20) -> night(20-6)
+      const P = {
+        dawn: { c0:[255,253,247], c1:[251,246,236], c2:[243,239,229], ring:[40,34,28] },
+        day:  { c0:[255,252,244], c1:[250,246,238], c2:[242,238,229], ring:[38,32,26] },
+        dusk: { c0:[255,249,242], c1:[249,241,234], c2:[241,234,226], ring:[44,36,28] },
+        night:{ c0:[246,243,236], c1:[239,235,228], c2:[232,228,220], ring:[48,40,34] },
+      };
+      function blend(a,b,t){
+        return {
+          c0: mixRGB(P[a].c0, P[b].c0, t),
+          c1: mixRGB(P[a].c1, P[b].c1, t),
+          c2: mixRGB(P[a].c2, P[b].c2, t),
+          ring: mixRGB(P[a].ring, P[b].ring, t),
+        };
+      }
+      if(h >= 6 && h < 10) return blend('dawn','day',(h-6)/4);
+      if(h >= 10 && h < 17) return blend('day','dusk',(h-10)/7);
+      if(h >= 17 && h < 20) return blend('dusk','night',(h-17)/3);
+      // night -> dawn wrap
+      const t = (h >= 20) ? (h-20)/10 : (h+4)/10; // 20..30 or 0..6 mapped to 0..1
+      return blend('night','dawn',t);
+    }
+
+    function addRipple(x,y, strength=1){
+      ripples.push({ x, y, t0: performance.now(), s: strength });
+      if(ripples.length > 28) ripples.splice(0, ripples.length - 28);
+    }
+
+    function drawRipples(t){
+      const now = performance.now();
+      const keep = [];
+      for(const r of ripples){
+        const age = (now - r.t0) / 1000;
+        if(age > 1.2) continue;
+        keep.push(r);
+        const p = age / 1.2;
+        const radius = 10 + p * 98 * r.s;
+        const alpha = (1 - p) * 0.24;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = 'rgba(90, 245, 180, 0.82)'; // clearer radar green
+        ctx.lineWidth = 1.9;
+        // main ring
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, radius, 0, Math.PI*2);
+        ctx.stroke();
+        // secondary ring (gives "water surface" feel)
+        ctx.globalAlpha = alpha * 0.75;
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, radius + 10, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ripples = keep;
+    }
+
+    function drawRadarSweep(t, pal){
+      // very subtle radar: rotating wedge + faint vignette
+      const cx = W/2, cy = H/2;
+      const R = Math.max(W,H) * 0.72;
+      const ang = (t * 0.55) % (Math.PI*2);
+      const spread = 0.34; // radians
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'multiply';
+
+      // faint green fog towards edges
+      const vg = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(W,H)*0.7);
+      vg.addColorStop(0, 'rgba(160,255,210,0.00)');
+      vg.addColorStop(1, 'rgba(120,245,188,0.15)');
+      ctx.fillStyle = vg;
+      ctx.fillRect(0,0,W,H);
+
+      // wedge gradient
+      ctx.translate(cx, cy);
+      ctx.rotate(ang);
+      const wg = ctx.createRadialGradient(0,0, 0, 0,0, R);
+      wg.addColorStop(0, 'rgba(120,230,180,0.00)');
+      wg.addColorStop(0.25, 'rgba(120,245,188,0.17)');
+      wg.addColorStop(1, 'rgba(120,230,180,0.00)');
+      ctx.fillStyle = wg;
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.arc(0,0, R, -spread, spread);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawSunCore(n, t){
+      const x = n.x, y = n.y;
+      const R0 = Math.max(14, n.r + 6);
+      const rr = randSeed(n.id || n.code || 'CORE');
+      const ph = rr() * Math.PI * 2;
+      const pulse = 1 + 0.028 * Math.sin(t*2.1 + ph) + 0.010 * Math.sin(t*5.4 + ph*0.7);
+      const R = R0 * pulse;
+      // halo
+      ctx.save();
+      ctx.shadowColor = 'rgba(255, 240, 200, 0.95)';
+      ctx.shadowBlur = 26 + 10*Math.max(0, Math.sin(t*1.6 + ph));
+      const hg = ctx.createRadialGradient(x - R*0.25, y - R*0.25, 2, x, y, R*1.8);
+      hg.addColorStop(0, 'rgba(255,255,255,0.98)');
+      hg.addColorStop(0.35, 'rgba(255,245,220,0.94)');
+      hg.addColorStop(1, 'rgba(255,220,150,0.00)');
+      ctx.fillStyle = hg;
+      ctx.beginPath();
+      ctx.arc(x, y, R*1.35, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // sun disk
+      const dg = ctx.createRadialGradient(x - R*0.22, y - R*0.18, 1, x, y, R);
+      dg.addColorStop(0, 'rgba(255,255,255,0.98)');
+      dg.addColorStop(0.4, 'rgba(255,235,185,0.98)');
+      dg.addColorStop(1, 'rgba(225,165,70,0.96)');
+      ctx.fillStyle = dg;
+      ctx.beginPath();
+      ctx.arc(x, y, R*0.86, 0, Math.PI*2);
+      ctx.fill();
+
+      // inner energy ring (yellow)
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      const ringR = R * 0.60;
+      const ringA = 0.22 + 0.08*Math.max(0, Math.sin(t*2.4 + ph*0.9));
+      ctx.strokeStyle = `rgba(255, 210, 90, ${ringA.toFixed(3)})`;
+      ctx.lineWidth = 2.4;
+      ctx.setLineDash([7, 6]);
+      ctx.lineDashOffset = -t * 22;
+      ctx.beginPath();
+      ctx.arc(x, y, ringR, 0, Math.PI*2);
+      ctx.stroke();
+      // a thin secondary ring to feel more "circular"
+      ctx.setLineDash([]);
+      ctx.strokeStyle = `rgba(255, 235, 170, ${(ringA*0.65).toFixed(3)})`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(x, y, ringR * 1.06, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+
+      // corona/rays (animated, still subtle)
+      const rot = t*0.22 + ph*0.2;
+      const rays = 14;
+      ctx.lineWidth = 1;
+      for(let i=0;i<rays;i++){
+        const a = rot + (i/rays)*Math.PI*2;
+        const wob = 0.08 * Math.sin(t*3.2 + ph + i*1.7);
+        const r1 = R*(0.98 + wob);
+        const r2 = R*(1.28 + wob + (i%2?0.06:0));
+        const alpha = 0.14 + 0.08*Math.max(0, Math.sin(t*2.7 + ph + i));
+        ctx.strokeStyle = `rgba(180,120,50,${alpha.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a)*r1, y + Math.sin(a)*r1);
+        ctx.lineTo(x + Math.cos(a)*r2, y + Math.sin(a)*r2);
+        ctx.stroke();
+      }
+
+      // soft flare arc
+      ctx.globalCompositeOperation = 'screen';
+      ctx.strokeStyle = 'rgba(255,220,150,0.16)';
+      ctx.lineWidth = 2.2;
+      const fa = rot*1.6;
+      ctx.beginPath();
+      ctx.arc(x, y, R*1.16, fa, fa + 1.0);
+      ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
+
+      // ring
+      ctx.strokeStyle = 'rgba(120,90,40,0.18)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, R*1.10, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPerson3D(n){
+      const x = n.x, y = n.y;
+      const s = Math.max(10, n.r + 8);
+      const headR = Math.max(5, s*0.30);
+      const bodyW = Math.max(10, s*0.78);
+      const bodyH = Math.max(12, s*0.92);
+      const headY = y - bodyH*0.38;
+      const bodyY = y + headR*0.25;
+
+      const skinBase = n.isMe ? 'rgba(245,210,195,0.96)' : 'rgba(244,200,182,0.96)';
+      const skinShadow = n.isMe ? 'rgba(220,170,150,0.96)' : 'rgba(216,160,140,0.96)';
+      const skinHi = 'rgba(255,248,242,0.98)';
+      const outline = 'rgba(28,24,20,0.18)';
+
+      // soft milk glow
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,252,244,0.95)';
+      ctx.shadowBlur = 22;
+
+      // body (rounded capsule)
+      const bg = ctx.createRadialGradient(x - bodyW*0.18, bodyY - bodyH*0.20, 2, x, bodyY, bodyW);
+      bg.addColorStop(0, skinHi);
+      bg.addColorStop(0.35, skinBase);
+      bg.addColorStop(1, skinShadow);
+      ctx.fillStyle = bg;
+      const r = Math.max(8, Math.min(18, bodyW*0.45));
+      roundRectPath(x - bodyW/2, bodyY - bodyH/2, bodyW, bodyH, r);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // head
+      const hg = ctx.createRadialGradient(x - headR*0.35, headY - headR*0.35, 1, x, headY, headR*1.6);
+      hg.addColorStop(0, skinHi);
+      hg.addColorStop(0.45, skinBase);
+      hg.addColorStop(1, skinShadow);
+      ctx.fillStyle = hg;
+      ctx.beginPath();
+      ctx.arc(x, headY, headR, 0, Math.PI*2);
+      ctx.fill();
+
+      // subtle outline
+      ctx.strokeStyle = outline;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(x, headY, headR, 0, Math.PI*2);
+      ctx.stroke();
+      roundRectPath(x - bodyW/2, bodyY - bodyH/2, bodyW, bodyH, r);
+      ctx.stroke();
+
+      // tiny inner highlight
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = 'rgba(255,255,255,1)';
+      ctx.beginPath();
+      ctx.arc(x - headR*0.28, headY - headR*0.18, Math.max(1.6, headR*0.18), 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    function layout(data){
+      nodes = [];
+      const cx = W/2, cy = H/2;
+      meId = data && data.me && data.me.personId;
+
+      // core
+      if(data && data.core){
+        nodes.push({
+          id: data.core.id,
+          kind: data.core.kind,
+          code: data.core.code,
+          title: data.core.title,
+          subtitle: data.core.subtitle,
+          link: null,
+          x: cx, y: cy,
+          r: 16,
+        });
+      }
+
+      const people = (data && data.people) || [];
+      const events = (data && data.events) || [];
+      const hidden = data && data.hidden;
+
+      // people orbits
+      const orbitR = Math.min(W, H) * 0.28;
+      people.forEach((p, idx) => {
+        const rr = randSeed(p.id);
+        const a = rr()*Math.PI*2;
+        const d = orbitR + rr()*Math.min(120, orbitR*0.6);
+        const x = cx + Math.cos(a)*d;
+        const y = cy + Math.sin(a)*d;
+        const isMe = !!p.isMe;
+        nodes.push({
+          id: p.id,
+          kind: p.kind,
+          code: p.code,
+          title: p.title,
+          subtitle: p.subtitle,
+          link: p.cardUrl || null,
+          x, y,
+          r: isMe ? 12 : 10,
+          isMe,
+        });
+      });
+
+      // events as small comets
+      const cometR = Math.min(W, H) * 0.42;
+      events.forEach((e, idx) => {
+        const rr = randSeed(e.id);
+        const a = rr()*Math.PI*2;
+        const d = cometR + rr()*Math.min(140, cometR*0.5);
+        const x = cx + Math.cos(a)*d;
+        const y = cy + Math.sin(a)*d;
+        nodes.push({
+          id: e.id,
+          kind: e.kind,
+          code: e.code,
+          title: e.title,
+          subtitle: e.subtitle,
+          link: null,
+          x, y,
+          r: 7,
+        });
+      });
+
+      if(hidden && hidden.title){
+        const rr = randSeed(hidden.id || 'hidden');
+        const a = rr()*Math.PI*2;
+        const d = Math.min(W, H) * 0.34;
+        const x = cx + Math.cos(a)*d;
+        const y = cy + Math.sin(a)*d;
+        nodes.push({
+          id: hidden.id || 'hidden',
+          kind: hidden.kind || 'hidden',
+          code: hidden.code || 'PRIV',
+          title: hidden.title,
+          subtitle: hidden.subtitle || '',
+          link: null,
+          x, y,
+          r: 9,
+        });
+      }
+
+      const privN = (hidden && hidden.title) ? (hidden.title.match(/\\d+/)?.[0] || '') : '';
+      hint.textContent = `pretty close NPC: ${people.length} · live: ${events.length}${privN ? (' · private: ' + privN) : ''}`;
+    }
+
+    function draw(){
+      const t = (performance.now() - t0) / 1000;
+      ctx.clearRect(0,0,W,H);
+
+      // background
+      const pal = timePalette();
+      const g = ctx.createRadialGradient(W*0.32, H*0.22, 18, W*0.5, H*0.5, Math.max(W,H)*0.95);
+      g.addColorStop(0, rgb(pal.c0, 1));
+      g.addColorStop(0.58, rgb(pal.c1, 1));
+      g.addColorStop(1, rgb(pal.c2, 1));
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,W,H);
+
+      // stars
+      for(const s of stars){
+        const tw = 0.10*Math.sin(t*2 + s.x*0.02 + s.y*0.01);
+        ctx.globalAlpha = Math.max(0.02, s.a + tw);
+        ctx.fillStyle = 'rgba(28,24,20,1)';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // radar sweep overlay (soft green)
+      drawRadarSweep(t, pal);
+
+      // soft nebula rings
+      const cx = W/2, cy = H/2;
+      ctx.strokeStyle = rgb(pal.ring, 0.10);
+      ctx.lineWidth = 1;
+      for(let i=1;i<=3;i++){
+        ctx.beginPath();
+        ctx.arc(cx, cy, i*Math.min(W,H)*0.18, 0, Math.PI*2);
+        ctx.stroke();
+      }
+
+      // nodes
+      for(const n of nodes){
+        // subtle floating like water surface
+        const rr = randSeed(n.id || n.code || 'n');
+        const ph = rr()*Math.PI*2;
+        const dx = Math.sin(t*0.9 + ph) * 1.4;
+        const dy = Math.cos(t*1.1 + ph) * 1.8;
+        const ox = n.x + dx;
+        const oy = n.y + dy;
+
+        if(n.code === 'CORE'){
+          drawSunCore({ ...n, x: ox, y: oy }, t);
+          // label
+          ctx.fillStyle = 'rgba(28,24,20,0.72)';
+          ctx.font = '12px ui-sans-serif, system-ui';
+          ctx.fillText('CORE', ox + n.r + 14, oy + 4);
+          continue;
+        }
+
+        if(n.kind === 'person'){
+          drawPerson3D({ ...n, x: ox, y: oy });
+          // label
+          ctx.fillStyle = 'rgba(28,24,20,0.78)';
+          ctx.font = '12px ui-sans-serif, system-ui';
+          const label = n.title || n.code || '';
+          if(label){
+            ctx.fillText(label, ox + n.r + 14, oy + 4);
+          }
+          continue;
+        }
+        let fill = 'rgba(28,24,20,0.90)';
+        let stroke = 'rgba(28,24,20,0.22)';
+        let glow = 'rgba(255,252,244,0.92)';
+        if(n.kind === 'venue'){ glow='rgba(255,245,220,0.92)'; stroke='rgba(170,130,60,0.24)'; }
+        if(n.kind === 'event'){ glow='rgba(255,236,242,0.92)'; stroke='rgba(160,80,110,0.18)'; }
+
+        // glow
+        ctx.beginPath();
+        ctx.fillStyle = fill;
+        ctx.shadowColor = glow;
+        ctx.shadowBlur = 18;
+        ctx.arc(ox, oy, n.r, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // ring
+        ctx.beginPath();
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.arc(ox, oy, n.r + 6, 0, Math.PI*2);
+        ctx.stroke();
+
+        // label
+        ctx.fillStyle = 'rgba(28,24,20,0.78)';
+        ctx.font = '12px ui-sans-serif, system-ui';
+        const label = n.code || '';
+        if(label){
+          ctx.fillText(label, ox + n.r + 10, oy + 4);
+        }
+      }
+
+      // water ripples on top
+      drawRipples(t);
+
+      requestAnimationFrame(draw);
+    }
+
+    function hitTest(x,y){
+      for(let i=nodes.length-1;i>=0;i--){
+        const n = nodes[i];
+        const dx = x - n.x, dy = y - n.y;
+        if(Math.sqrt(dx*dx + dy*dy) <= n.r + 8) return n;
+      }
+      return null;
+    }
+
+    function openNode(n){
+      if(!n) return;
+      panel.style.display = 'block';
+      pCode.textContent = n.code || '—';
+      pTitle.textContent = n.title || '—';
+      pSub.textContent = n.subtitle || '';
+      pBody.textContent = (n.kind === 'person')
+        ? '点“ID”查看与此人相关的公开留言板。'
+        : (n.kind === 'event' ? '这是场所内的实时动态片段。' : '这是当前场所中心点。');
+      if(n.link){
+        pLink.style.display = 'inline-block';
+        pLink.href = n.link;
+      }else{
+        pLink.style.display = 'none';
+        pLink.href = '#';
+      }
+    }
+
+    function closePanel(){
+      panel.style.display = 'none';
+    }
+
+    async function refresh(){
+      if(!venueId) return;
+      // mark me online so universe can see me
+      fetch(`/api/now/ping?venueId=${encodeURIComponent(venueId)}`).catch(()=>{});
+      const r = await fetch(`/api/universe?venueId=${encodeURIComponent(venueId)}`);
+      const j = await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(j.detail || 'universe_failed');
+      layout(j);
+    }
+
+    canvas.addEventListener('click', (ev)=>{
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      const n = hitTest(x,y);
+      if(n) openNode(n);
+    });
+    canvas.addEventListener('mousemove', (ev)=>{
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      pointer.active = true;
+      pointer.x = x; pointer.y = y;
+      const now = performance.now();
+      const dx = x - pointer.lastX, dy = y - pointer.lastY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist > 10 && (now - pointer.lastAt) > 38){
+        addRipple(x,y, Math.min(1.2, dist/34));
+        pointer.lastAt = now;
+        pointer.lastX = x; pointer.lastY = y;
+      }
+      const n = hitTest(x,y);
+      if(n){
+        canvas.style.cursor = 'pointer';
+        const t = n.kind === 'person' ? '信息名片' : (n.kind === 'event' ? 'live' : '场所');
+        if(n.kind === 'person'){
+          hint.textContent = `${n.title || 'Name'} · ${t}`.trim();
+        }else{
+          hint.textContent = `${n.code || ''} ${t} · ${n.title || ''}`.trim();
+        }
+      }else{
+        canvas.style.cursor = 'default';
+      }
+    });
+    canvas.addEventListener('mouseleave', ()=>{
+      canvas.style.cursor = 'default';
+      pointer.active = false;
+    });
+    canvas.addEventListener('pointerdown', (ev)=>{
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      addRipple(x, y, 1.55);
+      // a tighter inner ring adds tactile "water surface" feel
+      addRipple(x, y, 0.75);
+    }, { passive: true });
+    pClose.addEventListener('click', closePanel);
+
+    resize();
+    window.addEventListener('resize', resize);
+    refresh().catch(()=>{});
+    setInterval(()=>refresh().catch(()=>{}), 9000);
+    requestAnimationFrame(draw);
+  </script>
+{% endblock %}
+

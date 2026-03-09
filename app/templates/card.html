@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% set title = "名片 - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">公信力名片</div>
+    <div class="panel-body">
+      <div class="row" style="flex-wrap:wrap;">
+        <div class="pill">名片ID：<span class="mono">{{ personId }}</span></div>
+        <span class="shareWrap">
+          <button class="iconbtn" id="shareBtn" type="button" aria-label="分享名片链接">⤴</button>
+          <span class="shareTip" role="tooltip">复制名片链接，发给相关的人补充。</span>
+        </span>
+      </div>
+        {% if displayName or titleLine %}
+          <div class="row" style="flex-wrap:wrap; margin-top:10px;">
+            {% if displayName %}<div class="pill"><strong>{{ displayName }}</strong></div>{% endif %}
+            {% if titleLine %}<div class="pill">{{ titleLine }}</div>{% endif %}
+          </div>
+        {% endif %}
+      <div class="hint">
+        这里允许“匿名展示 / 署名展示”。但<strong>匿名展示不等于免责任</strong>：平台会保留发布者的站内标识用于申诉、纠错与处理滥用。
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">留言板（与此人相关）</div>
+    <div class="panel-body">
+      <div class="retroWall">
+        <div class="wall-banner">
+          <div class="wall-title">Ahelpis一海 · 留言板</div>
+          <div class="wall-marquee" aria-label="notice">
+            <span>匿名展示 ≠ 免责任 · 为此人声誉负责 · 写事实与可核验信息 · 允许申诉与纠错</span>
+          </div>
+        </div>
+
+        {% if entries and entries|length %}
+          <ul class="postlist wall-list">
+            {% for e in entries %}
+              <li class="postitem wall-item">
+                <div class="postmeta">
+                  <span class="badge">{{ "署名" if e.display == "signed" else "匿名" }}</span>
+                  <span class="muted small">{{ e.authorLabel }}</span>
+                  <span class="muted small">· {{ e.createdAt }}</span>
+                </div>
+                <div class="postbody">{{ e.body }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="muted">暂无留言。</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">投稿（为此人声誉负责）</div>
+    <div class="panel-body">
+      <form class="form" method="post" action="/card/{{ personId }}/new?venue={{ venue.id if venue else '' }}">
+        <label>
+          <div class="label">展示方式</div>
+          <select class="select" name="display">
+            <option value="anon">匿名展示（平台留存发布者ID）</option>
+            <option value="signed">署名展示（平台同样留存发布者ID）</option>
+          </select>
+        </label>
+        <label>
+          <div class="label">署名（仅在选择“署名展示”时显示）</div>
+          <input name="authorLabel" placeholder="例如：同事 / 合作方 / 朋友（不建议填真实姓名）" />
+        </label>
+        <label>
+          <div class="label">内容</div>
+          <textarea name="body" rows="4" placeholder="请写事实与可核验信息，避免情绪化指控。"></textarea>
+        </label>
+        <label class="row" style="gap:10px;">
+          <input type="checkbox" name="ack" />
+          <div class="muted small">我理解此内容会影响他人声誉，并愿意为真实性与后果负责。</div>
+        </label>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn primary" type="submit">提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('shareBtn');
+      const tip = btn && btn.parentElement ? btn.parentElement.querySelector('.shareTip') : null;
+      if (!btn) return;
+      const getLink = () => {
+        try { return String(location.href); } catch { return ''; }
+      };
+      async function copy(text) {
+        if (!text) return false;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch {}
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          return !!ok;
+        } catch {}
+        return false;
+      }
+      async function shareOrCopy() {
+        const link = getLink();
+        const original = tip ? tip.textContent : '';
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: 'ID card', url: link });
+            if (tip) tip.textContent = '已分享';
+            return;
+          }
+        } catch {}
+        const ok = await copy(link);
+        if (tip) tip.textContent = ok ? '已复制链接' : '复制失败';
+        setTimeout(() => { if (tip) tip.textContent = original; }, 1400);
+      }
+      btn.addEventListener('click', shareOrCopy);
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          shareOrCopy();
+        }
+      });
+    })();
+  </script>
+{% endblock %}
+

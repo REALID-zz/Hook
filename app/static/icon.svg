@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="g" cx="35%" cy="25%" r="80%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="1"/>
+      <stop offset="55%" stop-color="#06b6d4" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#050812" stop-opacity="1"/>
+    </radialGradient>
+    <linearGradient id="s" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.65"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#g)"/>
+  <circle cx="178" cy="196" r="6" fill="#fff" opacity="0.85"/>
+  <circle cx="320" cy="160" r="4" fill="#fff" opacity="0.72"/>
+  <circle cx="360" cy="246" r="3" fill="#fff" opacity="0.66"/>
+  <circle cx="130" cy="300" r="4" fill="#fff" opacity="0.7"/>
+  <circle cx="250" cy="320" r="3" fill="#fff" opacity="0.6"/>
+  <path d="M120 318c34-76 92-120 174-132 54-8 101 3 140 34" fill="none" stroke="url(#s)" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+  <path d="M156 350c28-62 76-98 144-108 44-6 82 3 114 27" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity="0.28"/>
+  <g fill="#fff">
+    <text x="256" y="276" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="60" font-weight="900" letter-spacing="7" opacity="0.92">Ahelpis</text>
+    <text x="256" y="332" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Noto Sans SC'" font-size="40" font-weight="900" letter-spacing="6" opacity="0.82">一海</text>
+  </g>
+</svg>
+

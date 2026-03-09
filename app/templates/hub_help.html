@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% set title = "Helpis - Ahelpis一海" %}
+
+{% block content %}
+  {% set qp = "?mode=" ~ (mode|default('global')) ~ "&venue=" ~ (venue.id if venue else '') %}
+
+  <div class="panel" id="helpHub">
+    <div class="panel-title">
+      <span class="duoText"><span class="en">Home</span><span class="cn">四大入口</span></span>
+    </div>
+    <div class="panel-body">
+      <div class="hubgrid">
+        <a class="hubcard" href="/help{{ qp }}#helpis">
+          <div class="hubtitle"><span class="duoText"><span class="en">Post</span><span class="cn">实时发生</span></span></div>
+          <div class="hubdesc muted small">现场配对 · 实拍验证 · 有问必答（入口）</div>
+        </a>
+        <a class="hubcard" href="/coffee{{ qp }}">
+          <div class="hubtitle"><span class="duoText"><span class="en">Coffee·Tea</span><span class="cn">三日计划</span></span></div>
+          <div class="hubdesc muted small">约见 · 计划 · 同城节奏（近3天）</div>
+        </a>
+        <a class="hubcard" href="/public{{ qp }}">
+          <div class="hubtitle"><span class="duoText"><span class="en">public well done</span><span class="cn">公共价值</span></span></div>
+          <div class="hubdesc muted small">资讯 · 公开明示 · 寻人寻物（长期）</div>
+        </a>
+        <a class="hubcard" href="/coffeechat{{ qp }}#otherHelps">
+          <div class="hubtitle"><span class="duoText"><span class="en">Helps</span><span class="cn">帮助</span></span></div>
+          <div class="hubdesc muted small">法律援助 · support/sell · BBEats · ForYou</div>
+        </a>
+      </div>
+      <div class="hint" style="margin-top:10px;">先选大类，再进入二级功能（避免页面太乱）。</div>
+    </div>
+  </div>
+
+  <div id="helpisView" style="display:none;">
+    <div class="panel" id="helpis">
+      <div class="panel-title">
+        <span class="duoText"><span class="en">Helpis</span><span class="cn">实时party</span></span>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <button class="btn" id="autoVenueBtn" type="button"><span aria-hidden="true">⟳</span> 识别此时 <span class="mono">now</span></button>
+        </div>
+        <div class="hint">实时刷新1次有效（once）</div>
+
+        <div class="segTabs" style="margin-top:14px;">
+          <button class="segTab" type="button" data-page="now">1 Now</button>
+          <button class="segTab" type="button" data-page="keep">2 Keep</button>
+        </div>
+
+        <div id="pageNow">
+          <div class="nowbox" style="margin-top:12px;">
+            <div class="row between">
+              <div class="muted small">
+                附近在线：<b id="nearCount">—</b>
+                <span class="liveTiny" id="presenceState" style="margin-left:8px;">live</span>
+              </div>
+              <div class="muted small" id="nearVenue"></div>
+            </div>
+            <div class="chips" id="nearUsers"></div>
+            <div class="row" style="margin-top:10px;">
+              <button class="btn" type="button" data-now="people">这些人在干嘛</button>
+              <button class="btn" type="button" data-now="live">这里有什么 live</button>
+            </div>
+            <div class="row" style="margin-top:10px;">
+              <button class="btn" type="button" data-template="need_food">Need / 吃饭搭子</button>
+              <button class="btn" type="button" data-template="need_help">Need / 现场帮忙</button>
+              <button class="btn" type="button" data-template="offer_skill">Offer / 我能帮</button>
+              <button class="btn" type="button" data-template="keep_project">Keep / 长一点</button>
+            </div>
+            <div class="aiAnswer" id="nowAnswer" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div id="pageKeep">
+    <details class="panel" open>
+      <summary class="panel-title">Deal / Live</summary>
+      <div class="panel-body">
+        <div class="row between" style="flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+          <div class="muted small">时效：</div>
+          <div class="segTabs" id="dlScopeTabs">
+            <button class="segTab" type="button" data-scope="now">Now</button>
+            <button class="segTab" type="button" data-scope="keep">Keep</button>
+          </div>
+          <div class="muted small" id="dlScopeHint"></div>
+        </div>
+        <div class="row">
+          <a class="btn primary" id="liveLink" href="/live?venue={{ venue.id if venue else '' }}">现场拍照邀约</a>
+          <a class="btn" id="newLink" href="/interact/new?venue={{ venue.id if venue else '' }}">普通邀约</a>
+          <a class="btn" href="/messages?room=venue:{{ venue.id if venue else '' }}">同场所实时消息</a>
+        </div>
+        <div class="hint">现场拍照邀约：相机实时画面拍照 + 一次性水印 + 当下定位精度。</div>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary class="panel-title">有问必答 / Right Here</summary>
+      <div class="panel-body">
+        <div class="muted small">问答验证：例如“我在 xx 餐厅捡到一个什么”，只有回答准确的人才进入实时对话。</div>
+        <div class="row" style="margin-top:10px;">
+          <a class="btn" href="/lost?venue={{ venue.id if venue else '' }}">先用失物招领跑通验证</a>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">other helps</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn" href="/coffeechat?venue={{ venue.id if venue else '' }}#otherHelps">go</a>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    const hubEl = document.getElementById('helpHub');
+    const viewEl = document.getElementById('helpisView');
+    let helpisInited = false;
+    function isHelpisActive(){
+      return String(location.hash || '') === '#helpis';
+    }
+
+    const venueId = {{ (venue.id if venue else '')|tojson }};
+    const nearCountEl = document.getElementById('nearCount');
+    const nearUsersEl = document.getElementById('nearUsers');
+    const nearVenueEl = document.getElementById('nearVenue');
+    const ansEl = document.getElementById('nowAnswer');
+    const pageNow = document.getElementById('pageNow');
+    const pageKeep = document.getElementById('pageKeep');
+    const tabs = Array.from(document.querySelectorAll('#helpis .segTab'));
+    const dlScopeTabs = Array.from(document.querySelectorAll('#dlScopeTabs .segTab'));
+    const dlScopeHint = document.getElementById('dlScopeHint');
+    const liveLink = document.getElementById('liveLink');
+    const newLink = document.getElementById('newLink');
+    let dlScope = 'keep';
+    let presenceTimer = null;
+    let presenceTick = null;
+    let lastPresenceAt = 0;
+
+    function setDlScope(nextScope){
+      dlScope = (nextScope === 'now') ? 'now' : 'keep';
+      dlScopeTabs.forEach(b => b.classList.toggle('active', (b.dataset.scope || 'keep') === dlScope));
+      if(dlScopeHint){
+        dlScopeHint.textContent = (dlScope === 'now') ? 'Now：30 mins' : 'Keep：1 hour';
+      }
+      try{
+        const v = encodeURIComponent(venueId || '');
+        if(liveLink) liveLink.setAttribute('href', `/live?venue=${v}&scope=${encodeURIComponent(dlScope)}`);
+        if(newLink) newLink.setAttribute('href', `/interact/new?venue=${v}&scope=${encodeURIComponent(dlScope)}`);
+      }catch{}
+      try{
+        const u = new URL(location.href);
+        u.searchParams.set('scope', dlScope);
+        history.replaceState(null, '', u.toString());
+      }catch{}
+    }
+    function setPage(p){
+      const page = (p === 'keep') ? 'keep' : 'now';
+      if(pageNow) pageNow.style.display = (page === 'now') ? '' : 'none';
+      if(pageKeep) pageKeep.style.display = (page === 'keep') ? '' : 'none';
+      tabs.forEach(t => t.classList.toggle('active', (t.dataset.page || 'now') === page));
+      try{
+        const u = new URL(location.href);
+        u.searchParams.set('p', page);
+        history.replaceState(null, '', u.toString());
+      }catch{}
+      if(page === 'now' && isHelpisActive()){
+        startPresence();
+      }else{
+        stopPresence();
+      }
+    }
+
+    function stopPresence(){
+      if(presenceTimer){ clearInterval(presenceTimer); presenceTimer = null; }
+      if(presenceTick){ clearInterval(presenceTick); presenceTick = null; }
+    }
+
+    function startPresence(){
+      if(!isHelpisActive()) return;
+      if(document.hidden) return;
+      refreshPresence();
+      if(!presenceTimer) presenceTimer = setInterval(refreshPresence, 6000);
+      if(!presenceTick) presenceTick = setInterval(() => {
+        const el = document.getElementById('presenceState');
+        if(!el) return;
+        if(!lastPresenceAt){
+          el.textContent = 'live';
+          return;
+        }
+        const s = Math.max(0, Math.round((Date.now() - lastPresenceAt)/1000));
+        el.textContent = `live · ${s}s`;
+      }, 1000);
+    }
+
+    function renderUsers(users, hiddenCount){
+      nearUsersEl.innerHTML = '';
+      (users || []).slice(0, 12).forEach(u => {
+        const el = document.createElement('span');
+        el.className = 'chip';
+        el.textContent = u;
+        nearUsersEl.appendChild(el);
+      });
+      if(hiddenCount && hiddenCount > 0){
+        const el = document.createElement('span');
+        el.className = 'chip';
+        el.textContent = `隐私星×${hiddenCount}`;
+        nearUsersEl.appendChild(el);
+      }
+      if(!users || users.length === 0){
+        const el = document.createElement('div');
+        el.className = 'muted small';
+        el.textContent = '暂时没人在线。';
+        nearUsersEl.appendChild(el);
+      }
+    }
+
+    async function refreshPresence(){
+      if(!isHelpisActive()) return;
+      if(!venueId) return;
+      if(pageNow && pageNow.style.display === 'none') return;
+      if(document.hidden) return;
+      try{
+        fetch(`/api/now/ping?venueId=${encodeURIComponent(venueId)}`).catch(()=>{});
+        const r = await fetch(`/api/now/presence?venueId=${encodeURIComponent(venueId)}`);
+        const j = await r.json().catch(()=>({}));
+        if(!r.ok) return;
+        nearCountEl.textContent = String(j.count ?? 0);
+        nearVenueEl.textContent = j.venueLabel ? String(j.venueLabel) : '';
+        renderUsers(j.users || [], j.hiddenCount || 0);
+        lastPresenceAt = Date.now();
+      }catch{}
+    }
+
+    async function askNow(kind){
+      if(!venueId) return;
+      ansEl.style.display = 'block';
+      ansEl.textContent = '…';
+      try{
+        const r = await fetch(`/api/now/ask?venueId=${encodeURIComponent(venueId)}&kind=${encodeURIComponent(kind)}`);
+        const j = await r.json().catch(()=>({}));
+        if(!r.ok) throw new Error(j.detail || 'failed');
+        ansEl.textContent = j.answer || '（无）';
+      }catch(e){
+        ansEl.textContent = `暂时不可用：${e.message || e}`;
+      }
+    }
+
+    const autoBtn = document.getElementById('autoVenueBtn');
+    async function autoVenue() {
+      autoBtn.disabled = true;
+      try {
+        try{
+          const host = String(location.hostname || '').toLowerCase();
+          const okHost = (host === 'localhost' || host === '127.0.0.1');
+          if (!okHost && !window.isSecureContext) {
+            throw new Error('need_https_for_geolocation');
+          }
+        }catch(e){
+          if(String(e && e.message || e).includes('need_https_for_geolocation')){
+            throw new Error('需要 HTTPS（或 localhost）才能定位。建议部署到带域名的 https，或用 cloudflared/ngrok。');
+          }
+        }
+        if (!navigator.geolocation) throw new Error('geolocation_not_supported');
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+        });
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const r = await fetch(`/api/venues/nearest?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`);
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.detail || 'nearest_failed');
+        const vid = j.venue && j.venue.id;
+        if (!vid) throw new Error('no_venue');
+        location.href = `/help?venue=${encodeURIComponent(vid)}#helpis`;
+      } catch (e) {
+        alert(`自动识别失败：${e.message || e}`);
+      } finally {
+        autoBtn.disabled = false;
+      }
+    }
+    if (autoBtn) autoBtn.addEventListener('click', autoVenue);
+
+    document.addEventListener('visibilitychange', () => {
+      if(!isHelpisActive()) return;
+      if(document.hidden){
+        stopPresence();
+      }else{
+        if(pageNow && pageNow.style.display !== 'none'){
+          startPresence();
+        }
+      }
+    });
+
+    function initHelpis(){
+      if(helpisInited) return;
+      helpisInited = true;
+      // init paging + scope
+      tabs.forEach(t => t.addEventListener('click', () => setPage(t.dataset.page || 'now')));
+      let initPage = 'now';
+      try{
+        initPage = (new URL(location.href)).searchParams.get('p') || 'now';
+      }catch{}
+      setPage(initPage);
+      try{
+        const s = (new URL(location.href)).searchParams.get('scope') || 'keep';
+        setDlScope(s);
+      }catch{
+        setDlScope('keep');
+      }
+      dlScopeTabs.forEach(b => b.addEventListener('click', () => setDlScope(b.dataset.scope || 'keep')));
+      document.querySelectorAll('[data-now]').forEach(btn => {
+        btn.addEventListener('click', () => askNow(btn.dataset.now));
+      });
+      document.querySelectorAll('[data-template]').forEach(btn => {
+        btn.addEventListener('click', () => openTemplate(btn.dataset.template || ''));
+      });
+    }
+
+    function openTemplate(key){
+      const v = encodeURIComponent(venueId || '');
+      let scope = 'now';
+      let title = '';
+      let body = '';
+      if(key === 'need_food'){
+        scope = 'now';
+        title = 'Need a +1 for dinner';
+        body = 'time window: now (30min)\nrule: public place · no private info\nwhat: looking for 1-2 people';
+      }else if(key === 'need_help'){
+        scope = 'now';
+        title = 'Need quick help';
+        body = 'time window: now (30min)\nwhat: (write one line)\nrule: public place · no transfer';
+      }else if(key === 'offer_skill'){
+        scope = 'now';
+        title = 'Offer: I can help';
+        body = 'time window: now (30min)\nI can: (write one line)\nrule: public place · boundary clear';
+      }else if(key === 'keep_project'){
+        scope = 'keep';
+        title = 'Keep: looking for someone';
+        body = 'time window: 1 hour\nwhat: (write one line)\nrule: public place · boundary clear';
+      }
+      const url = `/interact/new?venue=${v}&scope=${encodeURIComponent(scope)}&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+      location.href = url;
+    }
+    function setHubMode(){
+      const on = isHelpisActive();
+      if(hubEl) hubEl.style.display = on ? 'none' : '';
+      if(viewEl) viewEl.style.display = on ? '' : 'none';
+      if(on){
+        initHelpis();
+      }else{
+        stopPresence();
+      }
+    }
+    window.addEventListener('hashchange', setHubMode);
+    setHubMode();
+  </script>
+{% endblock %}
+

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% set title = "限时免费咨询 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">限时免费咨询（排队）</div>
+    <div class="panel-body">
+      <div class="hint">
+        这是“公益窗口”：为鸡毛蒜皮但影响心理健康/秩序的问题提供一个可负担的入口。\n
+        首版原型：先用工单排队；后续可接“律师在线实时限时咨询”。
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <a class="btn primary" href="/legal/ticket/new?venue={{ venue.id if venue else '' }}">提交一个公益工单</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">证据清单（你可以先准备）</div>
+    <div class="panel-body">
+      <ul class="list">
+        <li>时间窗口与场所（Venue）</li>
+        <li>聊天/帖子截图（不要含验证码/银行卡）</li>
+        <li>你希望达成的目标：停止骚扰/道歉/赔偿/撤下内容</li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
+

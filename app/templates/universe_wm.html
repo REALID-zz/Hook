@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set title = "Universe · real world - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">Universe · real world</div>
+    <div class="panel-body" style="padding-bottom:10px;">
+      <div class="row" style="align-items:center;">
+        <a class="btn" href="/universe?venue={{ venue.id if venue else '' }}">返回 Universe</a>
+        {% if wmLocalReady %}
+          <a class="btn" href="/wm/" rel="noopener noreferrer">全屏打开</a>
+        {% else %}
+          <a class="btn" href="{{ wmUrl }}" rel="noopener noreferrer">全屏打开</a>
+        {% endif %}
+        <a class="btn" href="/wm/reset" rel="noopener noreferrer">一键清缓存</a>
+        <a class="btn" href="{{ wmUrl }}" target="_blank" rel="noopener noreferrer">新窗口打开</a>
+      </div>
+
+      {% if wmBlocked %}
+        <div class="nowbox" style="margin-top:12px;">
+          <div style="font-weight:900;">CN 模式默认不启用此模块</div>
+          <div class="muted small" style="margin-top:6px; line-height:1.55;">
+            为规避在中国境内展示敏感地理/公开信息聚合的合规风险，这里默认关闭 real world。
+            你可以切换到 Global/HK 模式，或后续我们做“CN 安全版（无地图点位/无敏感图层）”再开启。
+          </div>
+        </div>
+      {% else %}
+        {% if not wmLocalReady %}
+          <div class="nowbox" style="margin-top:12px;">
+            <div style="font-weight:900;">本地 real world 还没“融入构建”</div>
+            <div class="muted small" style="margin-top:6px; line-height:1.55;">
+              你现在看到的是线上兜底版本。要把项目真正内置到本服务，请在 `aabapp/` 里执行：
+              <div class="mono" style="margin-top:8px; padding:10px 12px; border-radius:14px; background:rgba(0,0,0,.06);">
+                $env:WM_EMBED='1'; $env:WM_BASE='/wm/'; npm ci; npm run build
+              </div>
+              完成后重启 `abangtraad`，就会自动使用本地 `/wm/`。
+            </div>
+          </div>
+        {% endif %}
+        <div style="margin-top:12px; border:1px solid var(--line); border-radius:18px; overflow:hidden; background:rgba(255,255,255,.70); height:calc(100vh - 175px); min-height:780px;">
+          <iframe
+            title="real world"
+            src="{{ wmUrl }}"
+            style="display:block; width:100%; height:100%; border:0;"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            allow="fullscreen; clipboard-read; clipboard-write"
+          ></iframe>
+        </div>
+        <div class="hint">提示：如果你看到右侧按钮被挤压，用“全屏打开”会完全正常（不受外层滚动条影响）。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

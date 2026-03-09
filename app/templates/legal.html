@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set title = "public well done 法律 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">public well done 法律（鸡毛蒜皮也能被认真对待）</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/legal/probono?venue={{ venue.id if venue else '' }}">限时免费咨询（排队）</a>
+        <a class="btn" href="/legal/ticket/new?venue={{ venue.id if venue else '' }}">提交法律工单</a>
+        <a class="btn" href="/legal/team">合作律师团队（占位）</a>
+      </div>
+      <div class="hint">
+        平台不提供法律意见；我们提供“工单分发/预约/证据清单/联系律师”的能力。具体法律意见由持证律师/律所提供。
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">我的法律工单（示例/原型）</div>
+    <div class="panel-body">
+      {% if tickets %}
+        <ul class="postlist">
+          {% for t in tickets %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">{{ t.kind }}</span>
+                <span class="muted">#{{ t.id }} | {{ t.topic }} | {{ t.status }} | {{ t.createdAt }}</span>
+              </div>
+              <div class="posttitle">{{ t.summary }}</div>
+              <div class="postbody muted small">{{ (t.details or '')[:180] }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">还没有工单。你可以先走“限时免费咨询（排队）”。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

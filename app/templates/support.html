@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% set title = "support - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">support（作品支持/求助）</div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/support/new?venue={{ venue.id if venue else '' }}">发布</a>
+      </div>
+      <div class="hint">发给别人请用“详情页链接”（都在本平台内）。联系方式是否公开由你自己决定。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">列表</div>
+    <div class="panel-body">
+      {% if items and items|length %}
+        <ul class="postlist">
+          {% for x in items %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">support</span>
+                {% if x.contactPublic %}<span class="badge">联系方式公开</span>{% endif %}
+                <span class="muted small">· {{ x.createdAt }}</span>
+              </div>
+              <div class="posttitle"><a href="/support/{{ x.id }}?venue={{ venue.id if venue else '' }}">{{ x.title }}</a></div>
+              {% if x.story %}<div class="postbody">{{ x.story }}</div>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">暂无内容。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+

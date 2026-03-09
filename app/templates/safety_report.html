@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set title = "举报纠纷 / 民众反馈 - Ahelpis一海" %}
+
+{% block content %}
+  {% set preCat = (prefill.category if prefill and prefill.category else '') %}
+  {% set preSum = (prefill.summary if prefill and prefill.summary else '') %}
+  {% set preDet = (prefill.details if prefill and prefill.details else '') %}
+  <div class="panel">
+    <div class="panel-title">举报纠纷 / 民众反馈（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <div class="nowbox" style="margin-bottom:12px;">
+        <div class="muted small">提示：举报前可以先查看“已核实风险通报”（去标识化）；如需更强的安全工具再了解 Plus。</div>
+        <div class="row" style="margin-top:10px;">
+          <a class="btn" href="/safety/bulletins?venue={{ venue.id if venue else '' }}">已核实风险通报（去标识化）</a>
+          <a class="btn" href="/safety/plus">安全Plus（付费）</a>
+        </div>
+      </div>
+      <form method="post" action="/safety/report" class="form" enctype="multipart/form-data">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <label>
+          <div class="label">类型</div>
+          <select name="category" class="select">
+            <option value="scam" {% if preCat=='scam' %}selected{% endif %}>诈骗/引流/要验证码</option>
+            <option value="harassment" {% if preCat=='harassment' %}selected{% endif %}>骚扰/辱骂/跟踪</option>
+            <option value="safety" {% if preCat=='safety' %}selected{% endif %}>线下安全风险</option>
+            <option value="privacy" {% if preCat=='privacy' %}selected{% endif %}>隐私泄露/人肉</option>
+            <option value="dispute" {% if preCat=='dispute' %}selected{% endif %}>纠纷（消费/服务/协商）</option>
+            <option value="feedback" {% if preCat=='feedback' %}selected{% endif %}>民众反馈（建议/吐槽/改进）</option>
+            <option value="other" {% if (preCat and preCat not in ['scam','harassment','safety','privacy','dispute','feedback']) %}selected{% endif %}>其他</option>
+          </select>
+        </label>
+        <label>
+          <div class="label">一句话描述（不含个人隐私）</div>
+          <input name="summary" maxlength="240" placeholder="例如：服务纠纷 / 现场骚扰 / 平台建议" value="{{ preSum|e }}" required />
+        </label>
+        <label>
+          <div class="label">详细说明（可选）</div>
+          <textarea name="details" rows="6" placeholder="尽量描述事实、时间窗口、场所；不要写身份证/住址等隐私信息。">{{ preDet|e }}</textarea>
+        </label>
+        <label>
+          <div class="label">附件证据（可选：PPT/PDF/图片）</div>
+          <input type="file" name="evidence" accept=".ppt,.pptx,.pdf,image/*" />
+          <div class="hint">大小限制：图片≤2.8MB，PPT/PDF≤8MB。请勿上传身份证/住址/病历等敏感信息。</div>
+        </label>
+        <label>
+          <div class="label">公开方式（可选）</div>
+          <select class="select" name="publicMode">
+            <option value="private" selected>不公开（仅平台处理）</option>
+            <option value="public_anon">申请公开（匿名）</option>
+            <option value="public_signed">申请公开（署名：仅当你已选择“姓名公示”时显示）</option>
+          </select>
+          <div class="hint">平台实名留档可追责；是否公示由你选择，且仅在平台核实后才可能进入通报。</div>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">提交</button>
+          <a class="btn" href="/safety?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+        <div class="hint">提交后会生成案件编号。平台核实后才可能出现在“去标识化通报”。</div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

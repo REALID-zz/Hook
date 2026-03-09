@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set title = "名片 - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">名片不可见</div>
+    <div class="panel-body">
+      {% if reason == "venue_verified" %}
+        <div class="hint">此人的名片设置为“仅同场所验证可见”。你需要在同一场所，并完成在场验证（Deal/Live）后才能查看或投稿。</div>
+      {% else %}
+        <div class="hint">此人的名片已设置为“不公开”。为了隐私保护，你无法查看内容或进行投稿。</div>
+      {% endif %}
+      <div class="row" style="margin-top:10px;">
+        <a class="btn" href="/profile">我的页</a>
+      </div>
+      <div class="muted small" style="margin-top:12px;">名片ID：<span class="mono">{{ personId }}</span></div>
+    </div>
+  </div>
+{% endblock %}
+

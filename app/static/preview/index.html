@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>阿邦 - UI 预览</title>
+    <link rel="stylesheet" href="./preview.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">阿邦</div>
+      <div class="sub">UI 预览（静态原型，不需要安装 Flutter）</div>
+    </header>
+
+    <main class="wrap">
+      <aside class="nav">
+        <button class="navbtn active" data-go="login">登录</button>
+        <button class="navbtn" data-go="home">主页（四入口）</button>
+        <button class="navbtn" data-go="history">对话历史</button>
+        <button class="navbtn" data-go="chat">聊天（气泡）</button>
+        <button class="navbtn" data-go="persona">AI 形象</button>
+        <button class="navbtn" data-go="profile">个人中心</button>
+        <div class="hint">
+          说明：这是“看效果”的静态版本，数据与接口均为模拟。
+        </div>
+      </aside>
+
+      <section class="stage">
+        <div class="phone">
+          <div class="statusbar"></div>
+          <div class="appbar">
+            <div class="apptitle">哆啦B梦</div>
+          </div>
+          <div class="screen" data-screen="login">
+            <div class="center">
+              <div class="logo">阿邦</div>
+              <div class="muted">手机号 + 验证码登录（模拟）</div>
+              <div class="card">
+                <label class="field">
+                  <div class="label">手机号</div>
+                  <input class="input" placeholder="例如 13800000000" />
+                </label>
+                <div class="row">
+                  <label class="field grow">
+                    <div class="label">验证码</div>
+                    <input class="input" placeholder="6 位数字" />
+                  </label>
+                  <button class="btn">发送</button>
+                </div>
+                <button class="btn primary full" data-go="home">登录</button>
+                <div class="muted small">提示：请勿发送验证码/银行卡等敏感信息。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen hidden" data-screen="home">
+            <div class="pad">
+              <div class="h1">阿邦</div>
+              <div class="muted">选择一个入口开始。</div>
+              <div class="grid">
+                <div class="tile" data-go="chat">
+                  <div class="t-title">AI 对话</div>
+                  <div class="t-desc">气泡式聊天 · 摆烂人形象</div>
+                </div>
+                <div class="tile" data-go="persona">
+                  <div class="t-title">AI 形象</div>
+                  <div class="t-desc">自定义 · 模拟计费</div>
+                </div>
+                <div class="tile" data-go="history">
+                  <div class="t-title">历史记录</div>
+                  <div class="t-desc">列表 · 删除 · 复制</div>
+                </div>
+                <div class="tile" data-go="profile">
+                  <div class="t-title">个人中心</div>
+                  <div class="t-desc">手机号 · 退出登录</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen hidden" data-screen="history">
+            <div class="pad">
+              <div class="row between">
+                <div class="h2">对话历史</div>
+                <button class="btn" data-go="chat">新对话</button>
+              </div>
+              <div class="list" id="threadList"></div>
+              <div class="muted small" style="margin-top:10px;">操作：点击进入；右侧“删除”移除历史（模拟）。</div>
+            </div>
+          </div>
+
+          <div class="screen hidden" data-screen="chat">
+            <div class="chat">
+              <div class="sys">你正在与「摆烂人」对话。</div>
+              <div class="bubbleRow left">
+                <div class="avatar">摆</div>
+                <div class="bubble">
+                  嗯哼。你想聊什么？
+                  <button class="copy" data-copy>复制</button>
+                </div>
+              </div>
+              <div class="bubbleRow right">
+                <div class="bubble me">
+                  我想做一个很高级的 App。
+                  <button class="copy" data-copy>复制</button>
+                </div>
+                <div class="avatar me">我</div>
+              </div>
+              <div class="bubbleRow left">
+                <div class="avatar">摆</div>
+                <div class="bubble">
+                  我懂。先把信息架构收敛，再做细节。
+                  <button class="copy" data-copy>复制</button>
+                </div>
+              </div>
+            </div>
+            <div class="composer">
+              <input class="input grow" placeholder="发消息…" />
+              <button class="btn primary">发送</button>
+            </div>
+          </div>
+
+          <div class="screen hidden" data-screen="persona">
+            <div class="pad">
+              <div class="h2">AI 形象工作室</div>
+              <div class="muted">自定义名称/风格（模拟）</div>
+              <div class="card">
+                <label class="field">
+                  <div class="label">AI 名称</div>
+                  <input class="input" value="摆烂人" />
+                </label>
+                <label class="field">
+                  <div class="label">风格</div>
+                  <select class="input">
+                    <option>摆烂（短句、克制）</option>
+                    <option>默认（回声）</option>
+                  </select>
+                </label>
+                <div class="card soft">
+                  <div class="h3">计费（模拟）</div>
+                  <div class="muted small">AI 形象生成费用：¥ 9.9（占位）</div>
+                </div>
+                <button class="btn primary full">保存</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen hidden" data-screen="profile">
+            <div class="pad">
+              <div class="h2">个人中心</div>
+              <div class="muted">登录手机号：138****0000（模拟）</div>
+              <div style="height:18px;"></div>
+              <button class="btn full" data-go="login">退出登录</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./preview.js"></script>
+  </body>
+</html>
+

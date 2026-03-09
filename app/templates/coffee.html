@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set title = "Coffee Chat - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      Coffee Chat（{{ venue.name if venue else "未选择" }}）
+      <span class="muted">| 同场所轻量聊天邀约</span>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/coffee/new?venue={{ venue.id if venue else '' }}">发布Coffee Chat</a>
+        <a class="btn" href="/messages?room=venue:{{ venue.id if venue else '' }}">进入聊天</a>
+      </div>
+      <div class="hint">建议：公共场所、短时间窗口、群聊优先。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Coffee Chat 列表</div>
+    <div class="panel-body">
+      {% if invites %}
+        <ul class="postlist">
+          {% for p in invites %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">coffee</span>
+                <span class="muted">{{ p.startAt }} → {{ p.endAt }}</span>
+              </div>
+              <div class="posttitle">{{ p.title }}</div>
+              <div class="postbody">{{ p.body }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">还没有Coffee Chat，点上面按钮发布一个。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

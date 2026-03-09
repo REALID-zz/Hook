@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% set title = "消息 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">消息（WebSocket 原型）</div>
+    <div class="panel-body">
+      <div class="hint">首版：房间聊天（按场所/帖子分房间），默认匿名昵称。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">聊天窗口（{{ room }}）</div>
+    <div class="panel-body">
+      <div id="chat" class="chatbox"></div>
+      <form id="chatForm" class="row" onsubmit="return false;">
+        <input id="chatInput" placeholder="输入消息…" />
+        <button class="btn primary" id="sendBtn">发送</button>
+      </form>
+      <div class="hint">注意：不要发送个人敏感信息/验证码。</div>
+    </div>
+  </div>
+
+  <script>
+    const room = {{ room|tojson }};
+    const chatEl = document.getElementById('chat');
+    const inputEl = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const wsUrl = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat?room=${encodeURIComponent(room)}`;
+    const ws = new WebSocket(wsUrl);
+
+    function addLine(text, kind) {
+      const line = document.createElement('div');
+      line.className = `chatline ${kind || ''}`;
+      line.textContent = text;
+      chatEl.appendChild(line);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    ws.onmessage = (ev) => {
+      try {
+        const data = JSON.parse(ev.data);
+        if (data.type === 'system') addLine(`[系统] ${data.text}`, 'system');
+        if (data.type === 'msg') addLine(data.text, 'msg');
+      } catch {
+        addLine(ev.data, 'msg');
+      }
+    };
+
+    sendBtn.onclick = () => {
+      const val = inputEl.value.trim();
+      if (!val) return;
+      ws.send(val);
+      inputEl.value = '';
+      inputEl.focus();
+    };
+  </script>
+{% endblock %}
+

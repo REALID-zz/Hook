@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% set title = "互动 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      互动大厅（{{ venue.name if venue else "未选择" }}）
+      <span class="muted">| 场所级实时互动</span>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/interact/live?venue={{ venue.id if venue else '' }}">现场拍照邀约</a>
+        <a class="btn primary" href="/interact/new?venue={{ venue.id if venue else '' }}">发布邀约</a>
+        <a class="btn" href="/messages?room=venue:{{ venue.id if venue else '' }}">进入聊天</a>
+      </div>
+      <div class="hint">这里专注“同场所邀约”。范围大厅/大厅玩法请去 Post 分类页。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">邀约列表</div>
+    <div class="panel-body">
+      {% if invites %}
+        <ul class="postlist">
+          {% for p in invites %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">invite</span>
+                {% if p.scope == "now" %}
+                  <span class="badge">NOW</span>
+                {% else %}
+                  <span class="badge">KEEP</span>
+                {% endif %}
+                {% if p.verified %}
+                  <span class="badge">已验证</span>
+                {% endif %}
+                <span class="muted">{{ p.startAt }} → {{ p.endAt }}</span>
+              </div>
+              <div class="posttitle">{{ p.title }}</div>
+              {% if p.photoUrl %}
+                <div class="postmedia">
+                  <img class="postimg" src="{{ p.photoUrl }}" alt="现场照片" loading="lazy" />
+                </div>
+              {% endif %}
+              <div class="postbody">{{ p.body }}</div>
+              {% if p.addressLabel %}
+                <div class="hint">地点：{{ p.addressLabel }}{% if p.accuracyM %}（精度≈{{ p.accuracyM }}m）{% endif %}</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">暂时没有邀约，点“发布邀约”创建一个。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

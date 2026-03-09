@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set title = "实名留档（平台可追责） - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="warnTri" aria-hidden="true">!</span>
+      实名留档（平台可追责）
+    </div>
+    <div class="panel-body">
+      <div class="muted small">
+        说明：这是“平台方可追责”的实名留档，不会自动对外公示。是否对外展示姓名由你在首页名片里选择“姓名是否公示”决定。
+      </div>
+
+      <form class="form" method="post" action="/realname" style="margin-top:12px;">
+        <input type="hidden" name="next" value="{{ nextUrl|default('') }}" />
+        <label>
+          <div class="label">真实姓名（平台留档）</div>
+          <input name="legalName" value="{{ rec.legalName|default('') }}" autocomplete="name" required />
+        </label>
+        <label>
+          <div class="label">联系方式（手机或邮箱，平台留档）</div>
+          <input name="contact" value="{{ rec.contact|default('') }}" placeholder="手机号 / 邮箱" required />
+        </label>
+        <label>
+          <div class="label">证件号后4位（可选）</div>
+          <input name="idLast4" value="{{ rec.idLast4|default('') }}" placeholder="仅后4位（可空）" />
+          <div class="hint">为降低敏感信息风险，这里只保存后4位。</div>
+        </label>
+        <label style="margin-top:8px;">
+          <div class="row" style="align-items:flex-start;">
+            <input type="checkbox" name="statementOk" value="1" {% if (rec.statementOk|default(0)|int) == 1 %}checked{% endif %} />
+            <div class="muted small" style="line-height:1.4;">
+              我确认：我将对我在“举报纠纷/民众反馈”中阐述的事实负责；如被证实为恶意捏造，我愿承担相应责任（平台可追责）。
+            </div>
+          </div>
+        </label>
+        <div class="row" style="margin-top:12px;">
+          <button class="btn primary" type="submit">保存留档</button>
+          <a class="btn" href="{{ nextUrl|default('/safety') }}">返回</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

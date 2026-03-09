@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set title = "发布需求 / BBEats - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">发布需求 / BBEats（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <form method="post" action="/pets/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <label>
+          <div class="label">宠物类型</div>
+          <select name="petType" class="select">
+            <option value="cat">猫</option>
+            <option value="dog">狗</option>
+            <option value="other">其他</option>
+          </select>
+        </label>
+        <label>
+          <div class="label">数量</div>
+          <input name="petCount" type="number" min="1" max="6" value="1" />
+        </label>
+        <label>
+          <div class="label">开始时间（可选）</div>
+          <input name="startAt" type="datetime-local" />
+          <div class="hint">不填则默认“现在开始”；需求默认展示 3 天有效。</div>
+        </label>
+        <label>
+          <div class="label">需求说明（不含地址/联系方式）</div>
+          <textarea name="body" rows="6" placeholder="例如：每天上门2次喂粮+换水；需要铲屎；宠物怕生；钥匙在前台/门口自取（不要写精确门牌）。"></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">发布</button>
+          <a class="btn" href="/pets?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+        <div class="hint">首版不提供支付/担保。请勿转账、勿索要验证码；请在公共区域交接。</div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

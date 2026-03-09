@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% set title = "紧急事件详情 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="warnTri warnTriRed" aria-hidden="true">!</span>
+      紧急事件详情
+    </div>
+    <div class="panel-body">
+      <div class="postmeta">
+        <span class="badge">{{ case.kind }}</span>
+        <span class="badge">{{ case.reason }}</span>
+        <span class="badge">{{ case.risk }}</span>
+        <span class="muted small">#{{ case.id }} · {{ case.status }} · {{ case.createdAt }}</span>
+      </div>
+      <div class="posttitle" style="margin-top:6px;">{{ case.title }}</div>
+      {% if case.description %}
+        <div class="postbody" style="margin-top:6px; white-space:pre-wrap;">{{ case.description }}</div>
+      {% endif %}
+
+      <div class="row" style="margin-top:12px;">
+        <a class="btn" href="/emergency?venue={{ venue.id if venue else '' }}">返回列表</a>
+        {% if canViewEvidence %}
+          <a class="btn danger" href="/emergency/{{ case.id }}/export?venue={{ venue.id if venue else '' }}">导出官方数据包（zip）</a>
+        {% endif %}
+      </div>
+      <div class="hint">周围任何人都可提交“现场照片 + 讯息”。为避免敏感泄露：线索照片默认不公开，仅事件发起者可查看与导出。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">提交线索（现场照片/讯息）</div>
+    <div class="panel-body">
+      <form class="form" action="/emergency/{{ case.id }}/update" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <div>
+          <label class="muted small">讯息（可空，但至少要填讯息或上传照片）</label>
+          <textarea name="message" rows="4" placeholder="例如：我在XX门口看到疑似目标，穿着…，时间…"></textarea>
+        </div>
+        <div style="margin-top:10px;">
+          <label class="muted small">现场照片（可选）</label>
+          <input type="file" name="photo" accept="image/*" />
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="btn danger" type="submit">提交线索</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">线索记录</div>
+    <div class="panel-body">
+      {% if updates and updates|length %}
+        <ul class="postlist">
+          {% for u in updates %}
+            <li class="postitem">
+              <div class="muted small">{{ u.createdAt }} · #{{ u.id }}</div>
+              {% if u.message %}<div class="postbody" style="white-space:pre-wrap; margin-top:6px;">{{ u.message }}</div>{% endif %}
+              {% if u.photoUrl %}
+                <div class="postmedia">
+                  <a href="{{ u.photoUrl }}" target="_blank" rel="noopener noreferrer">
+                    <img class="postimg" src="{{ u.photoUrl }}" alt="现场照片" loading="lazy" />
+                  </a>
+                </div>
+              {% elif u.hasPhoto %}
+                <div class="muted small" style="margin-top:6px;">（该条线索包含照片：默认不公开）</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">还没有线索提交。</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

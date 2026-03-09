@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% set title = "报酬通道 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="pill">Reward</span>
+      <span class="muted small" style="margin-left:10px;">隐藏通道 · 简洁高级 · 只做建议与留档</span>
+    </div>
+    <div class="panel-body">
+      <div class="nowbox">
+        <div class="row between" style="flex-wrap:wrap; align-items:flex-end;">
+          <div>
+            <div style="font-weight:950;">给与报酬 / 索取报酬</div>
+            <div class="muted small">写一句话场景，系统按常理/人情给打赏或悬赏区间（可选保存）。</div>
+          </div>
+          <div class="muted small" id="rwState">—</div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <button class="btn" type="button" id="rwGiveBtn">给与报酬</button>
+          <button class="btn" type="button" id="rwAskBtn">索取报酬</button>
+          <div class="pill" id="rwCur">—</div>
+        </div>
+
+        <textarea id="rwScenario" rows="5" style="margin-top:10px; width:100%; resize:vertical;" placeholder="例如：帮我跑腿取文件（来回30分钟，今天内） / 帮我整理PPT并改排版（2小时内）"></textarea>
+
+        <div class="row" style="margin-top:10px;">
+          <button class="btn primary" type="button" id="rwSuggestBtn">AI 提示</button>
+          <button class="btn" type="button" id="rwSaveBtn">隐藏留档</button>
+          <a class="btn" href="/plan">返回 Plan</a>
+        </div>
+
+        <div class="aiAnswer" id="rwAnswer" style="display:none; margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const st = document.getElementById('rwState');
+      const curEl = document.getElementById('rwCur');
+      const ta = document.getElementById('rwScenario');
+      const ans = document.getElementById('rwAnswer');
+      const btnGive = document.getElementById('rwGiveBtn');
+      const btnAsk = document.getElementById('rwAskBtn');
+      const btnSug = document.getElementById('rwSuggestBtn');
+      const btnSave = document.getElementById('rwSaveBtn');
+      const venueId = {{ (venue.id if venue else '')|tojson }};
+      if(!st || !curEl || !ta || !ans || !btnGive || !btnAsk || !btnSug || !btnSave) return;
+
+      let direction = 'give';
+      function setDir(d){
+        direction = (d === 'ask') ? 'ask' : 'give';
+        btnGive.classList.toggle('primary', direction === 'give');
+        btnAsk.classList.toggle('primary', direction === 'ask');
+      }
+      setDir('give');
+
+      function setState(t){ st.textContent = t; }
+      function showAnswer(t){
+        ans.style.display = 'block';
+        ans.textContent = t;
+      }
+
+      async function suggest(){
+        const sc = String(ta.value || '').trim();
+        if(!sc){
+          showAnswer('先写一句话场景（越具体越准）。');
+          return;
+        }
+        setState('生成中…');
+        ans.style.display = 'none';
+        try{
+          const u = `/api/reward/suggest?direction=${encodeURIComponent(direction)}&scenario=${encodeURIComponent(sc)}`;
+          const r = await fetch(u);
+          const j = await r.json().catch(()=>({}));
+          if(!r.ok) throw new Error(j.detail || 'failed');
+          curEl.textContent = j.currency || '—';
+          const tiers = (j.tiers || []).map(x => `${j.currency} ${x}`).join(' / ');
+          showAnswer(`${j.tip}\n\n建议分档：${tiers}`);
+          setState('—');
+          return j;
+        }catch(e){
+          setState('—');
+          showAnswer(`不可用：${e && e.message ? e.message : e}`);
+          return null;
+        }
+      }
+
+      async function save(){
+        const sc = String(ta.value || '').trim();
+        if(!sc){
+          setState('需要内容');
+          return;
+        }
+        let sug = 0;
+        try{
+          const r = await suggest();
+          sug = (r && r.suggested) ? Number(r.suggested) : 0;
+        }catch{}
+        setState('保存中…');
+        try{
+          const r = await fetch('/api/reward/log', {
+            method:'POST',
+            headers:{'content-type':'application/json'},
+            body: JSON.stringify({ direction, scenario: sc, suggested: sug, venueId }),
+          });
+          const j = await r.json().catch(()=>({}));
+          if(!r.ok) throw new Error(j.detail || 'save_failed');
+          setState('已留档');
+        }catch(e){
+          setState(`保存失败`);
+        }
+      }
+
+      btnGive.addEventListener('click', () => setDir('give'));
+      btnAsk.addEventListener('click', () => setDir('ask'));
+      btnSug.addEventListener('click', suggest);
+      btnSave.addEventListener('click', save);
+    })();
+  </script>
+{% endblock %}
+

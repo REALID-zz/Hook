@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% set title = "Plan - 计划本 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="pill">PLAN</span>
+      <span class="muted small" style="margin-left:10px;">记事本式 · 自由编辑 · 自动保存</span>
+    </div>
+    <div class="panel-body">
+      <div class="nowbox">
+        <div class="row between" style="align-items:flex-end; flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:950;">你的计划本</div>
+            <div class="muted small">建议写：今天要做什么 / 这周目标 / 需要谁帮忙 / 关键链接</div>
+          </div>
+          <div class="muted small" id="planState">—</div>
+        </div>
+
+        <textarea id="planText" rows="14" style="margin-top:10px; width:100%; min-height:280px; resize:vertical;">{{ content|default('') }}</textarea>
+
+        <div class="row" style="margin-top:10px;">
+          <button class="btn" id="planCopyBtn" type="button">复制</button>
+          <a class="btn" href="/reward?venue={{ venue.id if venue else '' }}">报酬通道</a>
+          <a class="btn" href="/27hours">27hours</a>
+          <a class="btn primary" href="/help#helpis">去行动</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const ta = document.getElementById('planText');
+      const st = document.getElementById('planState');
+      const copyBtn = document.getElementById('planCopyBtn');
+      if(!ta || !st) return;
+
+      let lastSent = ta.value || '';
+      let saving = false;
+      let timer = null;
+
+      function setState(t){ st.textContent = t; }
+      function nowStr(){
+        try{ return new Date().toLocaleString(); }catch{ return ''; }
+      }
+
+      async function save(){
+        const v = String(ta.value || '');
+        if(v === lastSent) return;
+        if(saving) return;
+        saving = true;
+        setState('保存中…');
+        try{
+          const r = await fetch('/api/plan', {
+            method:'POST',
+            headers:{'content-type':'application/json'},
+            body: JSON.stringify({ content: v }),
+          });
+          const j = await r.json().catch(()=>({}));
+          if(!r.ok) throw new Error(j.detail || 'save_failed');
+          lastSent = v;
+          setState(`已保存 · ${j.updatedAt || nowStr()}`);
+        }catch(e){
+          setState(`保存失败：${e && e.message ? e.message : e}`);
+        }finally{
+          saving = false;
+        }
+      }
+
+      function schedule(){
+        setState('未保存');
+        if(timer) clearTimeout(timer);
+        timer = setTimeout(save, 650);
+      }
+
+      ta.addEventListener('input', schedule);
+      window.addEventListener('beforeunload', () => { try{ save(); }catch{} });
+      setState({{ updatedAt|default('')|tojson }} ? `上次保存 · {{ updatedAt|default('') }}` : '—');
+
+      if(copyBtn){
+        copyBtn.addEventListener('click', async () => {
+          try{
+            await navigator.clipboard.writeText(String(ta.value || ''));
+            setState('已复制到剪贴板');
+          }catch{
+            try{
+              ta.focus();
+              ta.select();
+              document.execCommand('copy');
+              setState('已复制到剪贴板');
+            }catch(e){
+              setState('复制失败');
+            }
+          }
+        });
+      }
+    })();
+  </script>
+{% endblock %}
+

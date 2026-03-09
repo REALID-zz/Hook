@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set title = "只问问题 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">只问问题（不进入实时互动）</div>
+    <div class="panel-body">
+      <div class="nowbox">
+        <div class="muted small">
+          这是“只问问题”模式：不需要实名、不建立聊天。你可以选择一个答案（可选写一句话）。
+          <br />如果你不想回应，直接关闭即可。
+        </div>
+        <div class="aiAnswer" style="margin-top:10px; font-weight:900;">{{ question }}</div>
+        <div class="row" style="margin-top:10px;">
+          <span class="badge">场所：{{ venue.name if venue else '' }}</span>
+          {% if expiresAt %}<span class="badge">有效期：{{ expiresAt }}</span>{% endif %}
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:12px;">
+        <div class="panel-title">你的回应</div>
+        <div class="panel-body">
+          <form method="post" action="/ask/{{ token }}" class="form">
+            <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+            <label>
+              <div class="label">选择</div>
+              <select name="choice" class="select">
+                <option value="yes">愿意</option>
+                <option value="maybe" selected>看看再说</option>
+                <option value="no">不愿意</option>
+              </select>
+            </label>
+            <label>
+              <div class="label">一句话（可选）</div>
+              <input name="message" maxlength="240" placeholder="例如：我先看看怎么用 / 或者：不方便" />
+            </label>
+            <div class="row">
+              <button class="btn primary" type="submit">发送回应</button>
+              <a class="btn" href="/universe?venue={{ venue.id if venue else '' }}">回到 Universe</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

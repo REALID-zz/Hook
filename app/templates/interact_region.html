@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% set title = "大范围互动大厅 - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      大范围互动大厅（{{ region.name }}）
+      <span class="muted">| 房间：{{ room }}</span>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn primary" href="/interact/live">现场拍照邀约</a>
+        <a class="btn" href="/messages?room={{ room }}">打开聊天页</a>
+        <a class="btn" href="/interact">回到场所大厅</a>
+      </div>
+      <div class="hint">
+        范围示例：南京↔上海。我们只做“可见范围”的互动，不展示精确坐标；请在公共区域会面，拒绝转账/验证码。
+      </div>
+      <div class="hint">
+        当前覆盖场所：{% if regionVenues %}{{ regionVenues|length }} 个{% else %}0 个{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">摆烂小游戏（大厅玩法）</div>
+    <div class="panel-body">
+      <div class="row">
+        <span class="pill">我：{{ me }}</span>
+        <button class="btn primary" id="bailBtn" type="button">摆一下（+1）</button>
+      </div>
+      <div class="hint">规则：每个人 30 秒最多摆 12 次（防刷）。这是“飞机上一起玩”的大厅氛围玩法。</div>
+      <div id="bailTop" class="feedbox" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">邀约列表（跨场所聚合）</div>
+    <div class="panel-body">
+      {% if invites %}
+        <ul class="postlist">
+          {% for p in invites %}
+            <li class="postitem">
+              <div class="postmeta">
+                <span class="badge">invite</span>
+                {% if p.verified %}<span class="badge">已验证</span>{% endif %}
+                <span class="muted">{{ p.venueName }}{% if p.venueCity %}·{{ p.venueCity }}{% endif %}</span>
+              </div>
+              <div class="posttitle">{{ p.title }}</div>
+              {% if p.photoUrl %}
+                <div class="postmedia">
+                  <img class="postimg" src="{{ p.photoUrl }}" alt="现场照片" loading="lazy" />
+                </div>
+              {% endif %}
+              <div class="postbody">{{ p.body }}</div>
+              {% if p.addressLabel %}
+                <div class="hint">地点：{{ p.addressLabel }}{% if p.accuracyM %}（精度≈{{ p.accuracyM }}m）{% endif %}</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">这个范围内暂时没有邀约。你可以去“现场拍照邀约”发一个。</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">实时动态（同一大范围房间）</div>
+    <div class="panel-body">
+      <div id="feed" class="chatbox" style="height:160px;"></div>
+      <div class="hint">这里会实时显示：新邀约提示、有人“摆一下”的事件。</div>
+    </div>
+  </div>
+
+  <script>
+    const room = {{ room|tojson }};
+    const feedEl = document.getElementById('feed');
+    const bailTopEl = document.getElementById('bailTop');
+    const bailBtn = document.getElementById('bailBtn');
+
+    function addFeedLine(text) {
+      const line = document.createElement('div');
+      line.className = 'chatline system';
+      line.textContent = text;
+      feedEl.appendChild(line);
+      feedEl.scrollTop = feedEl.scrollHeight;
+    }
+
+    function renderTop(top) {
+      bailTopEl.innerHTML = '';
+      (top || []).forEach((x, idx) => {
+        const line = document.createElement('div');
+        line.className = 'feedline';
+        line.textContent = `${idx + 1}. ${x.name} · ${x.score}`;
+        bailTopEl.appendChild(line);
+      });
+      if (!top || top.length === 0) {
+        const line = document.createElement('div');
+        line.className = 'muted small';
+        line.textContent = '还没人摆，来当第一个。';
+        bailTopEl.appendChild(line);
+      }
+    }
+
+    async function bail() {
+      bailBtn.disabled = true;
+      try {
+        const r = await fetch('/api/game/bailan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.detail || 'bail_failed');
+        renderTop(j.top || []);
+      } catch (e) {
+        addFeedLine(`摆烂失败：${e.message || e}`);
+      } finally {
+        bailBtn.disabled = false;
+      }
+    }
+    bailBtn.addEventListener('click', bail);
+
+    // WS: live feed
+    const wsUrl = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat?room=${encodeURIComponent(room)}`;
+    const ws = new WebSocket(wsUrl);
+    ws.onmessage = (ev) => {
+      try {
+        const data = JSON.parse(ev.data);
+        if (data.type === 'system') addFeedLine(`[系统] ${data.text}`);
+        if (data.type === 'event' && data.event === 'bailan') {
+          addFeedLine(`[摆烂] ${data.by} 摆了一下`);
+          renderTop(data.top || []);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    // init leaderboard (empty)
+    renderTop([]);
+  </script>
+{% endblock %}
+

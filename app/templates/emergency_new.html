@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% set title = "发起紧急求助 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="warnTri warnTriRed" aria-hidden="true">!</span>
+      发起紧急求助
+    </div>
+    <div class="panel-body">
+      <div class="hint">仅用于紧急场景：例如小朋友/老人失踪。请填写尽量明确的识别信息与时间窗口；可上传现场照片。</div>
+      <div class="hint">默认不公开敏感细节；后续可导出“官方数据包”（json+附件+hash）用于对接处理。</div>
+
+      <form class="form" action="/emergency/new" method="post" enctype="multipart/form-data" style="margin-top:12px;">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+
+        <div class="row" style="align-items:flex-start;">
+          <div style="flex:1; min-width:min(360px,100%);">
+            <label class="muted small">类型</label>
+            <select class="select" name="kind" style="width:100%; margin-top:6px;">
+              <option value="missing_child">周边小朋友失踪</option>
+              <option value="missing_elder">周边老人走失</option>
+              <option value="missing">其他紧急失踪</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="align-items:flex-start; margin-top:10px;">
+          <div style="flex:1; min-width:min(240px,100%);">
+            <label class="muted small">理由（Reason）</label>
+            <select class="select" name="reason" style="width:100%; margin-top:6px;">
+              <option value="witness">我目击</option>
+              <option value="self">我是当事人</option>
+              <option value="proxy">我代报</option>
+              <option value="online_lead">网络线索</option>
+            </select>
+          </div>
+          <div style="flex:1; min-width:min(240px,100%);">
+            <label class="muted small">风险等级</label>
+            <select class="select" name="risk" style="width:100%; margin-top:6px;">
+              <option value="low">低</option>
+              <option value="medium" selected>中</option>
+              <option value="high">高</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <label class="muted small">标题（必填）</label>
+          <input name="title" placeholder="例如：穿红色外套的小朋友在XX附近走失" maxlength="160" required />
+        </div>
+
+        <div style="margin-top:10px;">
+          <label class="muted small">说明（可填）</label>
+          <textarea name="description" rows="5" placeholder="时间/地点/特征/最后出现位置/需要周围人怎么做（不要写隐私信息）"></textarea>
+        </div>
+
+        <div style="margin-top:10px;">
+          <label class="muted small">现场照片（可选）</label>
+          <input type="file" name="photo" accept="image/*" />
+          <div class="hint">建议上传“现场环境/线索照片”。不要上传身份证等敏感证件照。</div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button class="btn danger" type="submit">发布求助</button>
+          <a class="btn" href="/emergency?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

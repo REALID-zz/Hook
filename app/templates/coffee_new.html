@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% set title = "发布 Coffee Chat - Ahelp阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">发布 Coffee Chat（{{ venue.name if venue else "未选择" }}）</div>
+    <div class="panel-body">
+      <form method="post" action="/coffee/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <label>
+          <div class="label">标题</div>
+          <input name="title" placeholder="例如：来杯咖啡聊10分钟？" required />
+        </label>
+        <label>
+          <div class="label">计划时间（未来 3 天内）</div>
+          <input name="startAt" type="datetime-local" />
+          <div class="hint">不填则默认“现在开始”；填了会按该时间生成 2 小时窗口。</div>
+        </label>
+        <label>
+          <div class="label">说明</div>
+          <textarea name="body" rows="4" placeholder="你在哪个角落、聊什么、人数、时间窗口（首版默认2小时）"></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">发布</button>
+          <a class="btn" href="/coffee?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+        <div class="hint">自动打上标签：coffee。</div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

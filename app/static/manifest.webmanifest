@@ -1,0 +1,19 @@
+{
+  "name": "Ahelpis一海",
+  "short_name": "Ahelpis",
+  "start_url": "/post",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050812",
+  "theme_color": "#050812",
+  "description": "Ahelpis一海：实时互助与公信力名片",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

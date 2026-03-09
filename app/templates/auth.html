@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% set title = "登录 - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">登录</div>
+    <div class="panel-body">
+      <div class="hubgrid">
+        <a class="hubcard" href="/?mode={{ mode|default('global') }}&venue={{ venue.id if venue else '' }}">
+          <div class="hubtitle">制作名片</div>
+          <div class="hubdesc">像制作一张社交通行证一样，先把你的 ID card 做好。</div>
+        </a>
+        <a class="hubcard" href="/help?mode={{ mode|default('global') }}&venue={{ venue.id if venue else '' }}#helpis">
+          <div class="hubtitle">getting</div>
+          <div class="hubdesc">已有用户界面直接进入（保留登录入口在下方）。</div>
+        </a>
+      </div>
+
+      <div class="hint" style="margin-top:14px;">登录（保留）</div>
+      <form class="form" method="get" action="/profile">
+        <label>
+          <div class="label">昵称</div>
+          <input name="nickname" placeholder="匿名_1234" />
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">登录</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

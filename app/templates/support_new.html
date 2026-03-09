@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% set title = "发布 support - Ahelpis阿海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">发布 support</div>
+    <div class="panel-body">
+      <form method="post" action="/support/new" class="form">
+        <input type="hidden" name="venueId" value="{{ venue.id if venue else '' }}" />
+        <label>
+          <div class="label">作品/项目标题</div>
+          <input name="title" placeholder="例如：我的摄影系列 / 个人建筑作品集" required />
+        </label>
+        <label>
+          <div class="label">缘由（你在做什么）</div>
+          <textarea name="story" rows="4" placeholder="写清楚背景、当前进度、为什么需要帮助。"></textarea>
+        </label>
+        <label>
+          <div class="label">需要什么帮助</div>
+          <textarea name="needHelp" rows="4" placeholder="例如：需要资源对接/合作伙伴/资金支持/传播/专业建议"></textarea>
+        </label>
+        <label>
+          <div class="label">联系方式（可选）</div>
+          <input name="contact" placeholder="例如：邮箱 / 微信号（自行承担公开风险）" />
+          <div class="hint">建议优先用邮箱。不要写验证码、银行卡等敏感信息。</div>
+        </label>
+        <label class="row" style="gap:10px;">
+          <input type="checkbox" name="contactPublic" />
+          <div class="muted small">公开展示联系方式</div>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">发布</button>
+          <a class="btn" href="/support?venue={{ venue.id if venue else '' }}">取消</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% set title = "public well done - Ahelpis一海" %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-title">
+      <span class="duoText"><span class="en">public well done</span><span class="cn">公共价值</span></span>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <a class="btn danger" href="/emergency?venue={{ venue.id if venue else '' }}">
+          <span class="warnTri warnTriRed" aria-hidden="true">!</span>
+          紧急事件
+          {% if emergencyOpen and emergencyOpen > 0 %}
+            <span class="badge dangerBadge">{{ emergencyOpen }}</span>
+          {% endif %}
+        </a>
+      </div>
+      <div class="hint">仅用于“周边失踪求助”等紧急场景：周围人可提交现场照片/讯息，形成记录以便对接官方。</div>
+
+      <div class="row" style="margin-top:10px;">
+        <a class="btn" href="/charity"><span class="duoText"><span class="en">news</span><span class="cn">资讯</span></span></a>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <a class="btn primary" href="/safety">公开明示</a>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <a class="btn primary" href="/lost?venue={{ venue.id if venue else '' }}">寻物寻主 / 失物招领（长期）</a>
+      </div>
+    </div>
+  </div>
+
+  <details class="panel">
+    <summary class="panel-title">
+      <span class="warnTri" aria-hidden="true">!</span>
+      注意 · 公共提示
+    </summary>
+    <div class="panel-body">
+      <div class="muted small">根据你的偏好，从公开信息源里挑选提示（可追溯到原文链接）。</div>
+
+      <div class="chips" id="prefChips" style="margin-top:10px;"></div>
+
+      <div class="nowbox" id="publicHintsBox" style="margin-top:12px;">
+        <div class="muted small" id="publicHintsState">加载中…</div>
+        <div id="publicHintsList" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </details>
+
+  <script>
+    (() => {
+      const chipWrap = document.getElementById('prefChips');
+      const stateEl = document.getElementById('publicHintsState');
+      const listEl = document.getElementById('publicHintsList');
+      if (!chipWrap || !stateEl || !listEl) return;
+
+      const PREFS = [
+        { key: 'outdoor', label: '户外/天气' },
+        { key: 'health', label: '健康' },
+        { key: 'entertainment', label: '娱乐' },
+        { key: 'fashion', label: '时尚' },
+        { key: 'tech', label: '科技' },
+      ];
+
+      let active = new Set();
+
+      function renderChips(){
+        chipWrap.innerHTML = '';
+        PREFS.forEach(p => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'chip chipbtn' + (active.has(p.key) ? ' active' : '');
+          b.textContent = p.label;
+          b.addEventListener('click', async () => {
+            if (active.has(p.key)) active.delete(p.key);
+            else active.add(p.key);
+            renderChips();
+            try{
+              await fetch('/api/prefs', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ prefs: Array.from(active) }),
+              });
+            }catch{}
+            await loadHints();
+          });
+          chipWrap.appendChild(b);
+        });
+      }
+
+      function escapeHtml(s){
+        return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+
+      async function loadHints(){
+        stateEl.textContent = '加载中…';
+        listEl.innerHTML = '';
+        try{
+          const r = await fetch('/api/public/hints');
+          const j = await r.json().catch(()=>({}));
+          if (!r.ok) throw new Error(j.detail || 'failed');
+          active = new Set(Array.isArray(j.prefs) ? j.prefs : []);
+          renderChips();
+          const hints = Array.isArray(j.hints) ? j.hints : [];
+          if (!hints.length){
+            stateEl.textContent = '暂无提示（可以先点上面偏好）。';
+            return;
+          }
+          stateEl.textContent = '';
+          const ul = document.createElement('ul');
+          ul.className = 'list';
+          hints.slice(0, 4).forEach(h => {
+            const it = (h && h.item) || {};
+            const li = document.createElement('li');
+            const tip = escapeHtml(h.tip || '');
+            const title = escapeHtml(it.title || '');
+            const src = escapeHtml(it.source || '');
+            const url = String(it.url || '');
+            li.innerHTML =
+              `<div style="font-weight:800;">${tip}</div>` +
+              `<div class="muted small" style="margin-top:4px;">` +
+              (url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${title || '原文链接'}</a>` : (title || '')) +
+              (src ? ` · ${src}` : '') +
+              `</div>`;
+            ul.appendChild(li);
+          });
+          listEl.appendChild(ul);
+        }catch(e){
+          stateEl.textContent = `加载失败：${e && e.message ? e.message : e}`;
+        }
+      }
+
+      renderChips();
+      loadHints();
+    })();
+  </script>
+{% endblock %}
+

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>一海 Ahelpis · 投资人版 Brief</title>
+    <style>
+      :root{
+        color-scheme: light;
+        --bg:#ffffff;
+        --ink:#111111;
+        --muted:#5c5c5c;
+        --line:rgba(17,17,17,.14);
+        --soft:#fbfbfc;
+        --gold:#c7a04a;
+        --max: 920px;
+      }
+      html,body{background:var(--bg); color:var(--ink); margin:0; padding:0;}
+      body{
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        line-height:1.55;
+      }
+      a{color:inherit;}
+      .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 64px;}
+      .topline{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+      .brand{
+        display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+      }
+      .brand .en{font-weight:900; letter-spacing:.02em; font-size:22px;}
+      .brand .cn{font-weight:900; font-size:22px;}
+      .meta{color:var(--muted); font-size:13px;}
+      .pillrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+      .pill{
+        display:inline-flex; align-items:center; gap:8px;
+        border:1px solid var(--line);
+        background:var(--soft);
+        padding:8px 12px;
+        border-radius:999px;
+        font-size:13px;
+        font-weight:800;
+      }
+      .dot{width:10px; height:10px; border-radius:999px; background:var(--gold); display:inline-block;}
+      h1{font-size:30px; line-height:1.16; margin:18px 0 10px;}
+      h2{font-size:18px; margin:26px 0 12px;}
+      h3{font-size:15px; margin:18px 0 10px;}
+      p{margin:10px 0;}
+      ul{margin:8px 0 8px 18px;}
+      li{margin:6px 0;}
+      .lead{
+        font-size:15.5px;
+        background:linear-gradient(180deg, rgba(199,160,74,.22), rgba(199,160,74,0));
+        border:1px solid rgba(199,160,74,.35);
+        border-radius:18px;
+        padding:14px 14px;
+      }
+      .grid{
+        display:grid;
+        grid-template-columns: 1fr;
+        gap:12px;
+      }
+      @media (min-width: 860px){
+        .grid.two{grid-template-columns: 1.2fr .8fr;}
+      }
+      .card{
+        border:1px solid var(--line);
+        background:var(--soft);
+        border-radius:18px;
+        padding:14px 14px;
+      }
+      .duo{display:block;}
+      .duo .en{display:block; font-weight:900;}
+      .duo .cn{display:block; color:var(--muted); font-weight:800; margin-top:2px;}
+      .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+      .k{
+        display:inline-block;
+        padding:2px 8px;
+        border-radius:999px;
+        background:#111;
+        color:#fff;
+        font-size:12px;
+        font-weight:900;
+        letter-spacing:.06em;
+        margin-right:6px;
+      }
+      .img{
+        width:100%;
+        height:auto;
+        display:block;
+        border-radius:16px;
+        border:1px solid var(--line);
+        background:#fff;
+      }
+      .caption{color:var(--muted); font-size:12.5px; margin-top:8px;}
+      .steps{padding-left:18px;}
+      .steps li{margin:10px 0;}
+      .hr{height:1px; background:var(--line); margin:18px 0;}
+      .foot{
+        color:var(--muted);
+        font-size:12px;
+        margin-top:22px;
+        padding-top:14px;
+        border-top:1px solid var(--line);
+      }
+      .printNote{display:none;}
+      @page{size:A4; margin:16mm;}
+      @media print{
+        .wrap{max-width:none; padding:0;}
+        a{text-decoration:none;}
+        .pill{background:#fff;}
+        .printBreak{break-before: page;}
+        .printNote{display:block; font-size:12px; color:var(--muted); margin-top:10px;}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topline">
+        <div class="brand" aria-label="brand">
+          <div class="en">Ahelpis</div>
+          <div class="cn">一海</div>
+        </div>
+        <div class="meta">
+          <div><span class="mono">Brief</span> · Investor-first · WeChat-friendly</div>
+          <div>建议用浏览器打印另存为 PDF（附录有步骤）</div>
+        </div>
+      </div>
+
+      <h1>把社交尴尬变成“递出一张 ID card”的动作</h1>
+      <div class="lead">
+        <span class="k">ONE-LINER</span>
+        一个“社交通行证（ID card）+ 场所级实时互动（Helpis / 实时party）+ 可追溯公共消息（news / 消息权）”的可运行原型，
+        用来把社交互动做得更自然、更可信、更即时。
+        <div class="printNote">对外演示时，可以按“30 秒上手”顺序直接操作。</div>
+      </div>
+
+      <div class="card" style="margin-top:12px;">
+        <span class="duo"><span class="en">27hours</span><span class="cn">我们帮你多加了 3 小时</span></span>
+        <p style="margin-top:10px;"><span class="k">CONCEPT</span><b>27hours：我们帮你多加了3个小时的生命——通过减少摩擦，让时间回到你自己手里。</b></p>
+        <p class="meta">不是把时间变长，而是把“浪费的摩擦”变少：少一点绕路、少一点被坑、少一点无效等待。</p>
+        <div class="pillrow" role="list" style="margin-top:10px;">
+          <div class="pill" role="listitem"><span class="dot"></span><span class="mono">24h</span> + <span class="mono">3h</span> = <span class="mono">27h</span></div>
+          <div class="pill" role="listitem"><span class="dot"></span>把多出来的 3 小时，用在自己/别人/城市</div>
+        </div>
+      </div>
+
+      <div class="pillrow" role="list">
+        <div class="pill" role="listitem"><span class="dot"></span>核心动作：SEND 一张 ID card</div>
+        <div class="pill" role="listitem"><span class="dot"></span>Realtime：同场所即时需求</div>
+        <div class="pill" role="listitem"><span class="dot"></span>Public：可信入口 + 可追溯</div>
+      </div>
+
+      <div class="grid two" style="margin-top:14px;">
+        <div class="card">
+          <span class="duo"><span class="en">What problem?</span><span class="cn">解决什么问题</span></span>
+          <ul>
+            <li><b>社交尴尬</b>：第一次见面/想认识却没切入点，容易冷场。</li>
+            <li><b>实时需求</b>：在某个地点当下需要“搭子/帮忙/信息”，但缺少即时的表达与匹配。</li>
+            <li><b>可信信息</b>：公共信息需要可追溯来源，避免“搬运、断章、难核验”。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="duo"><span class="en">Demo links</span><span class="cn">演示链接（填你的域名）</span></span>
+          <p class="meta" style="margin-top:8px;">
+            <span class="mono">https://your-domain.com/</span><br/>
+            <span class="mono">https://your-domain.com/help#helpis</span><br/>
+            <span class="mono">https://your-domain.com/charity</span>
+          </p>
+          <div class="hr"></div>
+          <p class="meta">
+            手机定位需要 HTTPS（浏览器安全策略）。如果你现在只在局域网测试，定位可能会失败，这是预期行为。
+          </p>
+        </div>
+      </div>
+
+      <h2>产品模型（信息架构）</h2>
+      <div class="card">
+        <img class="img" src="assets/model-map.svg" alt="Product model map" loading="lazy" />
+        <div class="caption">
+          对外口径统一为 6 个入口：ID card / Helpis / public loby / public well done / Universe / news（消息权）。
+        </div>
+      </div>
+
+      <h2>30 秒上手（按真实页面顺序）</h2>
+      <div class="card">
+        <ol class="steps">
+          <li><b>进门</b>：打开 <span class="mono">/</span>（ID card）。</li>
+          <li><b>getting</b>：点 <b>getting</b> → 进入 <span class="mono">/help#helpis</span>（Helpis / 实时party）。</li>
+          <li><b>My world</b>：点 <b>My world</b> → 进入 <span class="mono">/profile</span>（个人中心）。这里能 <b>OPEN</b> 公开卡，<b>SEND</b> 分享/复制链接，并设置可见性。</li>
+          <li><b>识别此时 now</b>：在 Helpis 里点“识别此时 now”，定位一次跳转最近场所；看“附近在线”实时刷新。</li>
+          <li><b>一键模板发需求</b>：点 Need/Offer 模板，自动带好标题与正文跳转到 <span class="mono">/interact/new</span> 发布。</li>
+          <li><b>news / 消息权</b>：打开 <span class="mono">/charity</span>，像读报一样浏览：标题 + 引用摘要 + 原文链接（可追溯）。</li>
+        </ol>
+      </div>
+
+      <h2>可信与安全（隐私、过滤、可追溯）</h2>
+      <div class="card">
+        <img class="img" src="assets/trust-flow.svg" alt="Trust and data flow" loading="lazy" />
+        <div class="caption">
+          三件事：用户自己决定公开/匿名；实时内容短时、能量友好；news 只展示“标题/摘要引用/原文链接”，可追溯来源。
+        </div>
+      </div>
+
+      <div class="printBreak"></div>
+      <h2>模型图片（现状 UI 截图）</h2>
+      <div class="grid two">
+        <div class="card">
+          <img class="img" src="assets/ui-news.png" alt="UI screenshot" loading="lazy" />
+          <div class="caption">现状截图示例：news / 消息权入口（标题在上、中文在下）。</div>
+        </div>
+        <div class="card">
+          <span class="duo"><span class="en">Why this split?</span><span class="cn">为什么要这样分层</span></span>
+          <ul>
+            <li><b>ID card</b>：把社交动作标准化，降低第一次互动门槛。</li>
+            <li><b>Helpis</b>：只做“此时此地”的需求与在线，短时、轻量、实时。</li>
+            <li><b>Public + news</b>：长期内容入口更明确，且强调可追溯与安全。</li>
+            <li><b>public loby</b>：把杂项入口收口，主线更干净。</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>落地方式（能真正被手机使用）</h2>
+      <div class="card">
+        <h3>测试期（同 Wi‑Fi）</h3>
+        <ul>
+          <li>手机访问 <span class="mono">http://局域网IP:8000/</span> 可看页面与分享链接。</li>
+          <li><b>定位通常会失败</b>（不是 HTTPS）。这是浏览器策略，不是产品逻辑问题。</li>
+        </ul>
+        <h3>上线期（可定位、可分享、可加主屏幕）</h3>
+        <ul>
+          <li>准备 <b>域名 + HTTPS</b>（推荐 Caddy 自动证书）。</li>
+          <li>结构：<span class="mono">Caddy(HTTPS)</span> → <span class="mono">uvicorn(127.0.0.1:8000)</span></li>
+          <li>备份：<span class="mono">abang.sqlite3</span>（+ <span class="mono">uploads/</span> 如有）</li>
+        </ul>
+      </div>
+
+      <h2>附录：导出 PDF（发微信最稳）</h2>
+      <div class="card">
+        <p><b>推荐方式</b>：用 Edge/Chrome 打开本文件，然后打印另存为 PDF。</p>
+        <ul>
+          <li>Windows：<span class="mono">Ctrl + P</span> → 目标打印机选“另存为 PDF” → 保存</li>
+          <li>Mac：<span class="mono">Cmd + P</span> → PDF → 存储为 PDF</li>
+        </ul>
+        <p class="meta">如果打印预览里出现空白页，通常是浏览器的分页计算问题；重开预览或改成“按 A4、边距默认”基本可解决。</p>
+      </div>
+
+      <div class="foot">
+        © Ahelpis 一海 · Investor-first brief · 本页用于导出 PDF；你也可以直接把 HTML 发到微信收藏里阅读。
+      </div>
+    </div>
+  </body>
+</html>
